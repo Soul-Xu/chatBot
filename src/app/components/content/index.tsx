@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ImgChatbot from "@/public/images/chatbot.png"
@@ -33,6 +33,7 @@ const Content = (props: Props) => {
   const [chartRecord, setChartRecord] = useState<any>(
     conversationList.map((item) => ({ ...item, isRotating: false }))
   )
+  const messagesEndRef = useRef(null); // 添加一个引用
 
   // 处理复杂功能
   const handleCopy = (text: string) => {
@@ -87,6 +88,7 @@ const Content = (props: Props) => {
     )
   }
 
+  // 常见问题列表
   const qaCommonList = [
     {
       id: 1,
@@ -334,9 +336,19 @@ const Content = (props: Props) => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
       </div>
     )
   }
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chartRecord]); // 监听 chartRecord 的变化
+
+  const scrollToBottom = () => {
+    // @ts-ignore
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     const content:any = messages?.map((content, index) => {
