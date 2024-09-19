@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 60px; /* 根据需要调整宽度 */
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #dab866; /* 空心圆点 */
+  transition: transform 0.5s ease-in-out; /* 设置动画过渡时间 */
+}
+
+.normal {
+  width: 10px;
+  height: 10px;
+}
+
+.large {
+  width: 15px;
+  height: 15px; /* 大圆点的尺寸 */
+}
+
+.active {
+  transform: scale(1.5); /* 激活状态的圆点放大 */
+}

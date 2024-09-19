@@ -1,0 +1,87 @@
+.footer {
+  position: fixed;
+  // bottom: 24px;
+  bottom: 0;
+  width: 400px;
+  min-height: 52px;
+  max-height: 200px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  border-radius: 0 0 12px 12px;
+
+  .content {
+    position: relative; // 设置为相对定位，用于内部元素的绝对定位
+    width: 100%; // 确保内容占满整个父容器宽度
+    display: flex; // 使用 flex 布局
+    flex-direction: column;
+    align-items: stretch; // 或者 flex-start，取决于您想要的布局
+    justify-content: flex-end; // 使按钮固定在底部
+    padding: 0 4px;
+
+    .input, .ant-input {
+      position: fixed;
+      // bottom: 32px;
+      bottom: 8px;
+      flex-grow: 1; // 让输入框占据剩余空间
+      width: 394px;
+      height: 36px;
+      background: #FFFFFF;
+      border-radius: 3px;
+      border: 1px solid #D9D9D9;
+      padding: 4px 8px 4px 12px;
+      font-size: 14px;
+
+      &::placeholder {
+        color: #999; // 设置你期望的 placeholder 颜色
+        opacity: 1; // 确保颜色不被透明度影响
+      }
+    }
+
+    .button, button, .ant-btn {
+      margin-right: 8px;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px !important; // 确保这个样式有足够的优先级
+      height: 28px !important;
+      background: #BF832E;
+      border-radius: 6px;
+      line-height: 28px; // 确保行高与高度相同，防止内容偏移
+      min-width: 28px; // 设置最小宽度为 28px
+      overflow: hidden; // 防止内容溢出
+      padding: 0; // 确保没有额外的 padding
+      border: none; // 如果不需要边框，可以设置为 none
+
+      &:hover {
+        background: #BF832E; // 设置 hover 时的背景颜色
+        opacity: 1; // 确保 hover 时不透明
+        color: #fff; // 设置 hover 时文字颜色，如果你想要改变文字颜色的话
+      }
+
+      img {
+        display: block;
+        width: 16px;
+        height: 16px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        &:hover {
+          display: block;
+          width: 16px;
+          height: 16px;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          opacity: 1 !important; /* 确保这个规则优先级最高 */
+        }
+      }
+    }
+  }
+}

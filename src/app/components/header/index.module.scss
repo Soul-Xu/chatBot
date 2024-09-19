@@ -1,0 +1,39 @@
+.header {
+  margin-top: -4px;
+  width: 400px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px 12px 13px;
+  background: #DAB866;
+  box-shadow: -12px 0px 24px 0px rgba(0,0,0,0.16);
+  border-radius: 12px 12px 0 0;
+
+  &-logo {
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #BF832E;
+    border-radius: 16px;
+
+    &-img {
+      display: inline-flex;
+      width: 20px;
+      height: 19px;
+    }
+  }
+
+  &-title {
+    width: 100%;
+    height: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+    line-height: 20px;
+    text-align: left;
+    font-style: normal;
+  }
+}
