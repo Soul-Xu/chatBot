@@ -11,7 +11,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
+    <main className="flex min-h-screen flex-col items-center" style={{ borderRadius: '12px' }}>
       <div className="z-10 items-center justify-between">
         <Header />
         <Content messages={messages} />
