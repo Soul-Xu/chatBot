@@ -30,10 +30,9 @@ const Content = (props: Props) => {
   const { messages } = props
   // 添加一个状态来控制旋转动画
   const [isRotating, setIsRotating] = useState(false);
-  const [isThinking] = useState(false) // 当用户发送消息时，立即显示一个加载状态或思考状态的提示
   // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>(
-    conversationList.map((item) => ({ ...item, isRotating: false }))
+    conversationList.map((item) => ({ ...item, isRotating: false })),
     // []
   )
   const messagesEndRef = useRef(null); // 添加一个引用
@@ -150,12 +149,145 @@ const Content = (props: Props) => {
     )
   }
 
+  // 文字loading
+  const textLoading = () => {
+      return (
+        <div className={classNames("assistant")}>
+          <div className={classNames("assistant-avatar")}>
+            <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+          </div>
+          <div className={classNames("assistant-content")}>
+            <DotAnimation />
+          </div>
+        </div>
+      )
+  }
+
+  // 文字loading - 停止输出
+  const textLoadingStopOut = () => {
+    return (
+      <div>
+        <div className={classNames("assistant")}>
+          <div className={classNames("assistant-avatar")}>
+            <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+          </div>
+          <div className={classNames("assistant-content")}>
+            <DotAnimation />
+          </div>
+        </div>
+        <div className={classNames("tip")}>
+          <span>停止输出</span>
+        </div>
+      </div>
+    )
+  }
+
+  // 图片loading
+  const picLoading = () => {
+    return (
+      <div className={classNames("assistant")}>
+        <div className={classNames("assistant-avatar")}>
+          <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+        </div>
+        <div className={classNames("assistant-content")}>
+          <div className={classNames("assistant-content-picLoading")}></div>
+        </div>
+      </div>
+    )
+  }
+
+  // 跳转列表
+  const jumpList = (list: Array<any>) => {
+    return (
+      <div>
+        <div className={classNames("assistant-content-list")}>
+          {
+            list.map((item:any) => {
+              return (
+                <Link 
+                  className={classNames("assistant-item")} 
+                  href={item.link}
+                  key={item.id} 
+                  target="_blank"
+                >
+                  <span className={classNames("assistant-item-title")}>
+                    {item.title}
+                  </span>
+                  {
+                    item?.linkIcon && (
+                      <span className={classNames("assistant-item-link")}>
+                        <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
+                      </span>
+                    )
+                  }
+                </Link>
+              )
+            }
+            )
+          }
+        </div>
+      </div>
+    )
+  }
+
+  // 查看详情跳转
+  const jumpDetail = (item: any) => {
+    return (
+      <div className={classNames("assistant-content-detail")}>
+        <Link href={item.detailUrl} target="_blank">
+          查看详情
+        </Link>
+        <span className={classNames("assistant-detail-link")}>
+          <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
+        </span>
+      </div>
+    )
+  }
+
+  // 二级标题列表
+  const subTitleList = (list: Array<any>) => {
+    return (
+      <div className={classNames("assistant-content-list")}>
+        {
+          list.map((item:any) => {
+            return (
+              <div
+                className={classNames("assistant-text-item")} 
+                key={item.id} 
+              >
+                <span className={classNames(
+                  {
+                    "assistant-text-item-main": item.type === "sub",
+                    "assistant-text-item-description": item.type !== "sub"
+                  }
+                )}>
+                  {item.title}
+                </span>
+                <span className={classNames("assistant-text-item-description")}>
+                  {item.description}
+                  {item.textLoading && 
+                    <span 
+                      className={classNames("loading")}
+                    >
+                      <RedoOutlined className={classNames('rotate-animation-infinite')} />
+                    </span>
+                  }
+                </span>
+              </div>
+            )
+          }
+          )
+        }
+      </div>
+    )
+  }
+
   // 聊天记录
   const chatRecord = () => {
     return (
       <div className={classNames("chat-record")}>
         {
-          chartRecord?.map((item:any, index: number) => {
+          chartRecord?.map((item: any, index: number) => {
             return (
               <div className={classNames("record-item")} key={item.id}>
                 {
@@ -174,153 +306,48 @@ const Content = (props: Props) => {
                     </div>
                   ) : item.type !== "stopOutput" && item.type !== "answerLoading" && item.type !== "picLoading" ?
                   (
-                    <div className={classNames("assistant")}>
-                      <div className={classNames("assistant-avatar")}>
-                        <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                      </div>
-                      <div className={classNames("assistant-content")}>
-                        <span className={classNames("assistant-content-title")}>{item.content}</span>
-                        {
-                          item?.list && item.list.length > 0 && (
-                            <div className={classNames("assistant-content-list")}>
-                              {
-                                item.list.map((item:any) => {
-                                  return (
-                                    <Link 
-                                      className={classNames("assistant-item")} 
-                                      href={item.link}
-                                      key={item.id} 
-                                      target="_blank"
-                                    >
-                                      <span className={classNames("assistant-item-title")}>
-                                        {item.title}
-                                      </span>
-                                      {
-                                        item?.linkIcon && (
-                                          <span className={classNames("assistant-item-link")}>
-                                            <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
-                                          </span>
-                                        )
-                                      }
-                                    </Link>
-                                  )
-                                }
-                                )
-                              }
-                            </div>
-                          )
-                        }
-                        {
-                          item?.detailUrl && (
-                            <div className={classNames("assistant-content-detail")}>
-                              <Link href={item.detailUrl} target="_blank">
-                                查看详情
-                              </Link>
-                              <span className={classNames("assistant-detail-link")}>
-                                <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
+                    <div>
+                      <div className={classNames("assistant")}>
+                          <div className={classNames("assistant-avatar")}>
+                            <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+                          </div>                  
+                          <div className={classNames("assistant-content")}>
+                            <span className={classNames("assistant-content-title")}>{item.content}</span>
+                            { item.list && item.list.length > 0 && (jumpList(item.list))}
+                            { item.detailUrl && jumpDetail(item)}
+                            { item.mainTitle && <div className={classNames("assistant-main-title")} >{item.mainTitle}</div>}
+                            { item.textList && item.textList.length > 0 && subTitleList(item.textList) }
+                            { item.detailTitle && <div className={classNames("assistant-detail-title")} >{item.detailTitle}</div>}
+                            { item.detailDesc && <div className={classNames("assistant-detail-desc")} >{item.detailDesc}</div>}
+                            <div className={classNames("assistant-content-action")} onClick={() => handleCopy(item.content)}>
+                              <span className={classNames("action-box")}>
+                                <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
+                                <span className={classNames("action-box-text")}>复制</span>
+                              </span>
+                              <span className={classNames("action-box")}>
+                                <Image 
+                                  src={ImgRefreshAction} 
+                                  alt="再试一次" 
+                                  width={20} 
+                                  height={20}
+                                  // className={classNames({ 'rotate-animation': isRotating })}
+                                  className={classNames({ 'rotate-animation': item.isRotating })}
+                                />
+                                <span 
+                                  className={classNames("action-box-text")} 
+                                  // onClick={handleRefreshClick}
+                                  onClick={() => handleRefreshClick(index)}
+                                >再试一次</span>
                               </span>
                             </div>
-                          )
-                        }
-                        { item.mainTitle && <div className={classNames("assistant-main-title")} >{item?.mainTitle}</div>}
-                        {
-                          item?.textList && item.textList.length > 0 && (
-                            <div className={classNames("assistant-content-list")}>
-                              {
-                                item.textList.map((item:any) => {
-                                  return (
-                                    <div
-                                      className={classNames("assistant-text-item")} 
-                                      key={item.id} 
-                                    >
-                                      <span className={classNames(
-                                        {
-                                          "assistant-text-item-main": item.type === "sub",
-                                          "assistant-text-item-description": item.type !== "sub"
-                                        }
-                                      )}>
-                                        {item.title}
-                                      </span>
-                                      <span className={classNames("assistant-text-item-description")}>
-                                        {item.description}
-                                        {item.textLoading && 
-                                          <span 
-                                            className={classNames("loading")}
-                                          >
-                                            <RedoOutlined className={classNames('rotate-animation-infinite')} />
-                                          </span>
-                                        }
-                                      </span>
-                                    </div>
-                                  )
-                                }
-                                )
-                              }
-                            </div>
-                          )
-                        }
-                        { item.detailTitle && <div className={classNames("assistant-detail-title")} >{item?.detailTitle}</div>}
-                        { item.detailDesc && <div className={classNames("assistant-detail-desc")} >{item?.detailDesc}</div>}
-                        <div className={classNames("assistant-content-action")}>
-                          <span className={classNames("action-box")}>
-                            <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
-                            <span className={classNames("action-box-text")}>复制</span>
-                          </span>
-                          <span className={classNames("action-box")}>
-                            <Image 
-                              src={ImgRefreshAction} 
-                              alt="再试一次" 
-                              width={20} 
-                              height={20}
-                              // className={classNames({ 'rotate-animation': isRotating })}
-                              className={classNames({ 'rotate-animation': item.isRotating })}
-                            />
-                            <span 
-                              className={classNames("action-box-text")} 
-                              // onClick={handleRefreshClick}
-                              onClick={() => handleRefreshClick(index)}
-                            >再试一次</span>
-                          </span>
+                          </div>
                         </div>
-                      </div>
                     </div>
                   ) : (
                     <div>
-                    { item?.type === "stopOutput" && (
-                      <div>
-                        <div className={classNames("assistant")}>
-                          <div className={classNames("assistant-avatar")}>
-                            <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                          </div>
-                          <div className={classNames("assistant-content")}>
-                            <DotAnimation />
-                          </div>
-                        </div>
-                        <div className={classNames("tip")}>
-                          <span>停止输出</span>
-                        </div>
-                      </div>
-                    )}
-                    { item?.type === "answerLoading" && (
-                      <div className={classNames("assistant")}>
-                        <div className={classNames("assistant-avatar")}>
-                          <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                        </div>
-                        <div className={classNames("assistant-content")}>
-                          <DotAnimation />
-                        </div>
-                      </div>
-                    )}
-                    { item?.type === "picLoading" && (
-                      <div className={classNames("assistant")}>
-                        <div className={classNames("assistant-avatar")}>
-                          <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                        </div>
-                        <div className={classNames("assistant-content")}>
-                          <div className={classNames("assistant-content-picLoading")}></div>
-                        </div>
-                      </div>
-                    )}
+                    { item.type === "stopOutput" && textLoadingStopOut()}
+                    { item.type === "answerLoading" && textLoading()}
+                    { item.type === "picLoading" && picLoading()}
                     </div>
                   )
                 }
@@ -328,17 +355,6 @@ const Content = (props: Props) => {
             )
           })
         }
-        {/* 如果AI正在思考，显示思考状态 */}
-        {isThinking && (
-          <div className={classNames("assistant")}>
-            <div className={classNames("assistant-avatar")}>
-              <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-            </div>
-            <div className={classNames("assistant-content")}>
-              <DotAnimation />
-            </div>
-          </div>
-        )}
         <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
       </div>
     )
@@ -356,7 +372,7 @@ const Content = (props: Props) => {
   useEffect(() => {
     // @ts-ignore
     if (messages?.length > 0) {
-      const content:any = messages?.map((content, index) => {
+      const newMessages:any = messages?.map((content, index) => {
         return {
           id: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
           role: "user",
@@ -364,11 +380,22 @@ const Content = (props: Props) => {
         };
       }) || [];
       // @ts-ignore
-      setChartRecord([].concat(content));
+      setChartRecord(chartRecord.concat(newMessages));
+      
+      // 调用 postStreamData 并处理异步逻辑
+      (async () => {
+        const params = {
+          inputContent: messages?.pop(),
+          sceneType: 'QA',
+          sessionId: ''
+        };
+        await postStreamData(params);
+      })();
     }
   }, [messages])
 
- useEffect(() => {
+  // stream-get
+  const getStreamData = () => {
     // 初始化 GET 请求的 EventSource
     const eventSourceGet = new EventSource('http://81.69.218.11/data/test/stream-get');
     eventSourceGet.onmessage = (event) => {
@@ -378,9 +405,9 @@ const Content = (props: Props) => {
         // 如果done为true，表示所有数据已经接收完毕，我们可以关闭EventSource
         eventSourceGet.close();
       } else {
+        // 如果done为false，表示还有数据需要接收，我们继续监听消息  
         setTimeout(() => {
           setChartRecord((prevChartRecord:any) => {
-            // console.log('set-111111', prevChartRecord)
             // 转换数据格式
             const newChartRecord = [...prevChartRecord];
             // 找到最后一项，并更新其值
@@ -389,6 +416,7 @@ const Content = (props: Props) => {
               id: lastIndex + 1,
               role: 'assistant',
               content: data.data.answer,
+              isRotating: false
             };
             return newChartRecord
           });
@@ -405,7 +433,111 @@ const Content = (props: Props) => {
     return () => {
       eventSourceGet.close();
     };
-  }, []);
+  }
+
+  // stream-post
+  const postStreamData = async (data:any) => {
+    // const postUrl = 'http://81.69.218.11/data/test/stream-post';
+    // const postUrl = 'http://172.253.168.62:9201/data/aiAgent/chat'
+    let postUrl = ''
+
+    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post';
+    const baseUrl2 = 'http://172.253.168.62:9201/data/aiAgent/chat';
+    const sitUrl = 'http://172.253.168.62:8080/web/#/';
+
+    // 获取当前页面的 URL
+    const currentUrl = window.location.href;
+
+    // 判断当前 URL 是否包含特定的 URL 段
+    if (currentUrl.includes(sitUrl)) {
+      // 如果包含特定的 URL 段，则使用第二个 URL
+      postUrl = baseUrl2
+    } else {
+      // 否则使用第一个 URL
+      postUrl = baseUrl1
+    }
+
+    const response:any = await fetch(postUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    // 获取 ReadableStream
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let done = false;
+    let buffer = '';
+
+    // 逐块读取数据
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+      if (value) {
+        // 解码二进制数据为字符串
+        buffer += decoder.decode(value, { stream: !done });
+        // 处理缓冲区中的数据
+        processBuffer();
+      }
+    }
+
+    // 处理缓冲区中的数据
+  function processBuffer() {
+    // 找到最后一个换行符
+    const lastNewLineIndex = buffer.lastIndexOf('\n');
+    if (lastNewLineIndex === -1) {
+      // 如果没有换行符，缓冲区中的数据不完整，等待更多数据
+      return;
+    }
+
+    // 获取完整的 JSON 对象
+    const completeLines = buffer.slice(0, lastNewLineIndex);
+    // 更新缓冲区，移除已处理的数据
+    buffer = buffer.slice(lastNewLineIndex + 1);
+
+    // 处理每一行数据
+    completeLines.split('\n').forEach((line:any,) => {
+      if (line) {
+        try {
+          const lineObj = JSON.parse(line.split('data:')[1])
+
+          if (lineObj.done === true) {
+            // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
+          } else {
+            setChartRecord((prevChartRecord:any[]) => {
+              // 查找是否有匹配的 ID 来更新助手的回答
+              const foundIndex = prevChartRecord.findIndex(item => item.id === lineObj.id);
+
+              if (foundIndex !== -1) {
+                // 如果找到匹配的 ID，更新助手的回答
+                const updatedRecord = {
+                  ...prevChartRecord[foundIndex],
+                  content: lineObj.data?.answer
+                };
+                const newChartRecord = [...prevChartRecord];
+                newChartRecord[foundIndex] = updatedRecord;
+                return newChartRecord;
+              } else {
+                // 如果没有找到匹配的 ID，添加新的记录
+                const newRecord = {
+                  id: lineObj.id,
+                  role: 'assistant',
+                  content: lineObj.data?.answer,
+                  isRotating: false
+                };
+                return [...prevChartRecord, newRecord];
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Failed to process line:', error);
+        }
+        }
+      });
+    }
+  };
 
   return (
     <main className={classNames("main")}>
