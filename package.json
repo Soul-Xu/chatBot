@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.4.0",
+    "@types/eventsource": "^1.1.15",
     "antd": "^5.20.6",
+    "axios": "^1.7.7",
     "classnames": "^2.5.1",
     "copy-to-clipboard": "^3.3.3",
+    "eventsource": "^2.0.2",
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",

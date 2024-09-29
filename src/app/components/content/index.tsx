@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
+import React, { useEffect, useState, useRef, useCallback, useReducer } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ImgChatbot from "@/public/images/chatbot.png"
@@ -18,6 +18,8 @@ import { conversationList } from '@/app/constants'
 import classnames from "classnames/bind";
 import styles from "./index.module.scss";
 const classNames = classnames.bind(styles);
+// @ts-ignore
+import EventSource from "eventsource";
 
 interface Props {
   children?: React.ReactNode
@@ -32,6 +34,7 @@ const Content = (props: Props) => {
   // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>(
     conversationList.map((item) => ({ ...item, isRotating: false }))
+    // []
   )
   const messagesEndRef = useRef(null); // 添加一个引用
 
@@ -351,16 +354,58 @@ const Content = (props: Props) => {
   };
 
   useEffect(() => {
-    const content:any = messages?.map((content, index) => {
-      return {
-        id: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
-        role: "user",
-        content: content
-      };
-    }) || [];
     // @ts-ignore
-    setChartRecord(conversationList.concat(content));
+    if (messages?.length > 0) {
+      const content:any = messages?.map((content, index) => {
+        return {
+          id: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
+          role: "user",
+          content: content
+        };
+      }) || [];
+      // @ts-ignore
+      setChartRecord([].concat(content));
+    }
   }, [messages])
+
+ useEffect(() => {
+    // 初始化 GET 请求的 EventSource
+    const eventSourceGet = new EventSource('http://81.69.218.11/data/test/stream-get');
+    eventSourceGet.onmessage = (event) => {
+      // 处理从服务器接收到的消息
+      const data = JSON.parse(event.data);
+      if (data.done === true) {
+        // 如果done为true，表示所有数据已经接收完毕，我们可以关闭EventSource
+        eventSourceGet.close();
+      } else {
+        setTimeout(() => {
+          setChartRecord((prevChartRecord:any) => {
+            // console.log('set-111111', prevChartRecord)
+            // 转换数据格式
+            const newChartRecord = [...prevChartRecord];
+            // 找到最后一项，并更新其值
+            const lastIndex = newChartRecord.length - 1;
+            newChartRecord[lastIndex] = {
+              id: lastIndex + 1,
+              role: 'assistant',
+              content: data.data.answer,
+            };
+            return newChartRecord
+          });
+        }, 3000)
+      }
+    };
+
+    eventSourceGet.onerror = (error) => {
+      console.error('EventSource failed:', error);
+      eventSourceGet.close();
+    };
+
+    // 清理函数
+    return () => {
+      eventSourceGet.close();
+    };
+  }, []);
 
   return (
     <main className={classNames("main")}>
