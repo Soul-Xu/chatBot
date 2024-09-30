@@ -30,6 +30,12 @@ const Content = (props: Props) => {
   const { messages } = props
   // 添加一个状态来控制旋转动画
   const [isRotating, setIsRotating] = useState(false);
+  // 添加一个loading控制答案的输出状态
+  const [isLoading, setIsLoading] = useState(false);
+  // 添加一个answerLoading控制答案输入中还未完成的输出状态
+  const [answerLoading, setAnswerLoading] = useState(false);
+  // 添加一个showStopOut来控制是否显示停止输出字段
+  const [showStopOut, setShowStopOut] = useState(false);
   // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>(
     conversationList.map((item) => ({ ...item, isRotating: false })),
@@ -73,6 +79,17 @@ const Content = (props: Props) => {
       }, 10000); // 假设动画持续时间为3秒
     }
   };
+
+  // 处理点击"再试一次"的事件
+  const handleTryAgainClick = (index: number) => {
+    // 在这里执行你的操作
+    const params = {
+      inputContent: chartRecord[index - 1].content,
+      sceneType: 'QA',
+      sessionId: ''
+    };
+    postStreamData(params);
+  }
 
   // 开场白
   const openingStatement = () => {
@@ -312,15 +329,33 @@ const Content = (props: Props) => {
                             <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
                           </div>                  
                           <div className={classNames("assistant-content")}>
-                            <span className={classNames("assistant-content-title")}>{item.content}</span>
+                            { isLoading 
+                              ? <span className={classNames("assistant-content-title")}>
+                                <DotAnimation />
+                              </span> 
+                              : <div>
+                                  <span className={classNames("assistant-content-title")}>
+                                    {item.content}
+                                    {
+                                      answerLoading && (
+                                        <span 
+                                          className={classNames("loading")}
+                                        >
+                                          <RedoOutlined className={classNames('rotate-animation-infinite')} />
+                                        </span>
+                                      )
+                                    }
+                                  </span>
+                              </div>
+                            }
                             { item.list && item.list.length > 0 && (jumpList(item.list))}
                             { item.detailUrl && jumpDetail(item)}
                             { item.mainTitle && <div className={classNames("assistant-main-title")} >{item.mainTitle}</div>}
                             { item.textList && item.textList.length > 0 && subTitleList(item.textList) }
                             { item.detailTitle && <div className={classNames("assistant-detail-title")} >{item.detailTitle}</div>}
                             { item.detailDesc && <div className={classNames("assistant-detail-desc")} >{item.detailDesc}</div>}
-                            <div className={classNames("assistant-content-action")} onClick={() => handleCopy(item.content)}>
-                              <span className={classNames("action-box")}>
+                            <div className={classNames("assistant-content-action")}>
+                              <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
                                 <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
                                 <span className={classNames("action-box-text")}>复制</span>
                               </span>
@@ -336,7 +371,7 @@ const Content = (props: Props) => {
                                 <span 
                                   className={classNames("action-box-text")} 
                                   // onClick={handleRefreshClick}
-                                  onClick={() => handleRefreshClick(index)}
+                                  onClick={() => handleTryAgainClick(index)}
                                 >再试一次</span>
                               </span>
                             </div>
@@ -437,6 +472,7 @@ const Content = (props: Props) => {
 
   // stream-post
   const postStreamData = async (data:any) => {
+    setIsLoading(true)
     // const postUrl = 'http://81.69.218.11/data/test/stream-post';
     // const postUrl = 'http://172.253.168.62:9201/data/aiAgent/chat'
     let postUrl = ''
@@ -505,31 +541,38 @@ const Content = (props: Props) => {
 
           if (lineObj.done === true) {
             // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
+            setAnswerLoading(false)
           } else {
-            setChartRecord((prevChartRecord:any[]) => {
-              // 查找是否有匹配的 ID 来更新助手的回答
-              const foundIndex = prevChartRecord.findIndex(item => item.id === lineObj.id);
+            setIsLoading(false)
+            setAnswerLoading(true)
+            setTimeout(() => {
+              setChartRecord((prevChartRecord:any[]) => {
+                // 查找是否有匹配的 ID 来更新助手的回答
+                const foundIndex = prevChartRecord.findIndex(item => item.id === lineObj.sessionId);
 
-              if (foundIndex !== -1) {
-                // 如果找到匹配的 ID，更新助手的回答
-                const updatedRecord = {
-                  ...prevChartRecord[foundIndex],
-                  content: lineObj.data?.answer
-                };
-                const newChartRecord = [...prevChartRecord];
-                newChartRecord[foundIndex] = updatedRecord;
-                return newChartRecord;
-              } else {
-                // 如果没有找到匹配的 ID，添加新的记录
-                const newRecord = {
-                  id: lineObj.id,
-                  role: 'assistant',
-                  content: lineObj.data?.answer,
-                  isRotating: false
-                };
-                return [...prevChartRecord, newRecord];
-              }
-            });
+                // console.log("prevChartRecord: ", prevChartRecord)
+
+                if (foundIndex !== -1) {
+                  // 如果找到匹配的 ID，更新助手的回答
+                  const updatedRecord = {
+                    ...prevChartRecord[foundIndex],
+                    content: lineObj.data?.answer
+                  };
+                  const newChartRecord = [...prevChartRecord];
+                  newChartRecord[foundIndex] = updatedRecord;
+                  return newChartRecord;
+                } else {
+                  // 如果没有找到匹配的 ID，添加新的记录
+                  const newRecord = {
+                    id: lineObj.sessionId,
+                    role: 'assistant',
+                    content: lineObj.data?.answer,
+                    isRotating: false
+                  };
+                  return [...prevChartRecord, newRecord];
+                }
+              });
+            }, 3000)
           }
         } catch (error) {
           console.error('Failed to process line:', error);
