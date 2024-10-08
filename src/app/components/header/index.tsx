@@ -1,8 +1,8 @@
-import Image from "next/image";
-import ImgRobotIcon from "@/public/images/robot_icon.png";
-import classnames from "classnames/bind";
-import styles from "./index.module.scss";
-const classNames = classnames.bind(styles);
+import Image from "next/image"
+import ImgRobotIcon from "@/public/images/robot_icon.png"
+import classnames from "classnames/bind"
+import styles from "./index.module.scss"
+const classNames = classnames.bind(styles)
 
 const Header = () => {
   return (
@@ -12,7 +12,7 @@ const Header = () => {
       </div>
       <span className={classNames("header-title")}>流程助手</span>
     </header>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

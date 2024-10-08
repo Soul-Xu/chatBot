@@ -1,7 +1,7 @@
-"use client";
-import React, { useEffect, useState, useRef, useCallback, useReducer } from "react";
-import Image from "next/image";
-import Link from "next/link";
+"use client"
+import React, { useEffect, useState, useRef, useCallback, useReducer } from "react"
+import Image from "next/image"
+import Link from "next/link"
 import ImgChatbot from "@/public/images/chatbot.png"
 import ImgQAIcon from "@/public/images/qa_icon.png"
 import ImgRefreshIcon from "@/public/images/refresh_icon.png"
@@ -9,17 +9,16 @@ import ImgArrowIcon from "@/public/images/arrow_icon.png"
 import ImgLinkIcon from "@/public/images/link_icon.png"
 import ImgCopyAction from "@/public/images/copy_action.png"
 import ImgRefreshAction from "@/public/images/refresh_action.png"
-import DotAnimation from "./components/dotAnimation";
-import copy from 'copy-to-clipboard';
-import { message } from "antd";
-import { Avatar } from "antd"
-import { UserOutlined, RedoOutlined } from '@ant-design/icons';
-import { conversationList } from '@/app/constants'
-import classnames from "classnames/bind";
-import styles from "./index.module.scss";
-const classNames = classnames.bind(styles);
+import DotAnimation from "./components/dotAnimation"
+import copy from 'copy-to-clipboard'
+import { message,  Avatar } from "antd"
+import { UserOutlined, RedoOutlined } from '@ant-design/icons'
+// import { conversationList } from '@/app/constants'
+import classnames from "classnames/bind"
+import styles from "./index.module.scss"
+const classNames = classnames.bind(styles)
 // @ts-ignore
-import EventSource from "eventsource";
+import EventSource from "eventsource"
 
 interface Props {
   children?: React.ReactNode
@@ -29,56 +28,56 @@ interface Props {
 const Content = (props: Props) => {
   const { messages } = props
   // 添加一个状态来控制旋转动画
-  const [isRotating, setIsRotating] = useState(false);
+  const [isRotating, setIsRotating] = useState(false)
   // 添加一个loading控制答案的输出状态
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
   // 添加一个answerLoading控制答案输入中还未完成的输出状态
-  const [answerLoading, setAnswerLoading] = useState(false);
+  const [answerLoading, setAnswerLoading] = useState(false)
   // 添加一个showStopOut来控制是否显示停止输出字段
-  const [showStopOut, setShowStopOut] = useState(false);
+  const [showStopOut, setShowStopOut] = useState(false)
   // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>(
-    conversationList.map((item) => ({ ...item, isRotating: false })),
-    // []
+    // conversationList.map((item) => ({ ...item, isRotating: false })),
+    []
   )
-  const messagesEndRef = useRef(null); // 添加一个引用
+  const messagesEndRef = useRef(null) // 添加一个引用
 
   // 处理复杂功能
   const handleCopy = (text: string) => {
-    copy(text);
-    message.success('复制成功');
+    copy(text)
+    message.success('复制成功')
   }
 
   // 处理点击"换一批"的事件
   const handleRefreshClick = (index?: number) => {
     if (!index && !isRotating) {
-      setIsRotating(true);
+      setIsRotating(true)
       // 在动画结束后重置 isRotating 状态
-      setTimeout(() => setIsRotating(false), 3000); // 假设动画持续时间为10秒
+      setTimeout(() => setIsRotating(false), 3000) // 假设动画持续时间为10秒
       // @ts-ignore
     } else if (index && !chatRecord[index]?.isRotating) {
       setChartRecord((prevChatRecords:any) => {
-        const newChatRecords = [...prevChatRecords];
+        const newChatRecords = [...prevChatRecords]
         // 只更新对应聊天记录项的旋转状态
         newChatRecords[index] = {
           ...newChatRecords[index],
           isRotating: true,
-        };
-        return newChatRecords;
-      });
+        }
+        return newChatRecords
+      })
       // 在动画结束后重置旋转状态
       setTimeout(() => {
         setChartRecord((prevChatRecords:any) => {
-          const newChatRecords = [...prevChatRecords];
+          const newChatRecords = [...prevChatRecords]
           newChatRecords[index] = {
             ...newChatRecords[index],
             isRotating: false,
-          };
-          return newChatRecords;
-        });
-      }, 10000); // 假设动画持续时间为3秒
+          }
+          return newChatRecords
+        })
+      }, 10000) // 假设动画持续时间为3秒
     }
-  };
+  }
 
   // 处理点击"再试一次"的事件
   const handleTryAgainClick = (index: number) => {
@@ -87,8 +86,8 @@ const Content = (props: Props) => {
       inputContent: chartRecord[index - 1].content,
       sceneType: 'QA',
       sessionId: ''
-    };
-    postStreamData(params);
+    }
+    postStreamData(params)
   }
 
   // 开场白
@@ -365,12 +364,10 @@ const Content = (props: Props) => {
                                   alt="再试一次" 
                                   width={20} 
                                   height={20}
-                                  // className={classNames({ 'rotate-animation': isRotating })}
                                   className={classNames({ 'rotate-animation': item.isRotating })}
                                 />
                                 <span 
                                   className={classNames("action-box-text")} 
-                                  // onClick={handleRefreshClick}
                                   onClick={() => handleTryAgainClick(index)}
                                 >再试一次</span>
                               </span>
@@ -396,13 +393,13 @@ const Content = (props: Props) => {
   }
 
   useEffect(() => {
-    scrollToBottom();
-  }, [chartRecord]); // 监听 chartRecord 的变化
+    scrollToBottom()
+  }, [chartRecord]) // 监听 chartRecord 的变化
 
   const scrollToBottom = () => {
     // @ts-ignore
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
   useEffect(() => {
     // @ts-ignore
@@ -412,10 +409,10 @@ const Content = (props: Props) => {
           id: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
           role: "user",
           content: content
-        };
-      }) || [];
+        }
+      }) || []
       // @ts-ignore
-      setChartRecord(chartRecord.concat(newMessages));
+      setChartRecord(chartRecord.concat(newMessages))
       
       // 调用 postStreamData 并处理异步逻辑
       (async () => {
@@ -423,66 +420,66 @@ const Content = (props: Props) => {
           inputContent: messages?.pop(),
           sceneType: 'QA',
           sessionId: ''
-        };
-        await postStreamData(params);
-      })();
+        }
+        await postStreamData(params)
+      })()
     }
   }, [messages])
 
   // stream-get
   const getStreamData = () => {
     // 初始化 GET 请求的 EventSource
-    const eventSourceGet = new EventSource('http://81.69.218.11/data/test/stream-get');
+    const eventSourceGet = new EventSource('http://81.69.218.11/data/test/stream-get')
     eventSourceGet.onmessage = (event) => {
       // 处理从服务器接收到的消息
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data)
       if (data.done === true) {
         // 如果done为true，表示所有数据已经接收完毕，我们可以关闭EventSource
-        eventSourceGet.close();
+        eventSourceGet.close()
       } else {
         // 如果done为false，表示还有数据需要接收，我们继续监听消息  
         setTimeout(() => {
           setChartRecord((prevChartRecord:any) => {
             // 转换数据格式
-            const newChartRecord = [...prevChartRecord];
+            const newChartRecord = [...prevChartRecord]
             // 找到最后一项，并更新其值
-            const lastIndex = newChartRecord.length - 1;
+            const lastIndex = newChartRecord.length - 1
             newChartRecord[lastIndex] = {
               id: lastIndex + 1,
               role: 'assistant',
               content: data.data.answer,
               isRotating: false
-            };
+            }
             return newChartRecord
-          });
+          })
         }, 3000)
       }
-    };
+    }
 
     eventSourceGet.onerror = (error) => {
-      console.error('EventSource failed:', error);
-      eventSourceGet.close();
-    };
+      console.error('EventSource failed:', error)
+      eventSourceGet.close()
+    }
 
     // 清理函数
     return () => {
-      eventSourceGet.close();
-    };
+      eventSourceGet.close()
+    }
   }
 
   // stream-post
   const postStreamData = async (data:any) => {
     setIsLoading(true)
-    // const postUrl = 'http://81.69.218.11/data/test/stream-post';
+    // const postUrl = 'http://81.69.218.11/data/test/stream-post'
     // const postUrl = 'http://172.253.168.62:9201/data/aiAgent/chat'
     let postUrl = ''
 
-    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post';
-    const baseUrl2 = 'http://172.253.168.62:9201/data/aiAgent/chat';
-    const sitUrl = 'http://172.253.168.62:8080/web/#/';
+    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
+    const baseUrl2 = 'http://172.253.168.62:9201/data/aiAgent/chat'
+    const sitUrl = 'http://172.253.168.62:8080/web/#/'
 
     // 获取当前页面的 URL
-    const currentUrl = window.location.href;
+    const currentUrl = window.location.href
 
     // 判断当前 URL 是否包含特定的 URL 段
     if (currentUrl.includes(sitUrl)) {
@@ -499,39 +496,39 @@ const Content = (props: Props) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
-    });
+    })
 
     // 获取 ReadableStream
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let done = false;
-    let buffer = '';
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder('utf-8')
+    let done = false
+    let buffer = ''
 
     // 逐块读取数据
     while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
+      const { value, done: doneReading } = await reader.read()
+      done = doneReading
       if (value) {
         // 解码二进制数据为字符串
-        buffer += decoder.decode(value, { stream: !done });
+        buffer += decoder.decode(value, { stream: !done })
         // 处理缓冲区中的数据
-        processBuffer();
+        processBuffer()
       }
     }
 
     // 处理缓冲区中的数据
   function processBuffer() {
     // 找到最后一个换行符
-    const lastNewLineIndex = buffer.lastIndexOf('\n');
+    const lastNewLineIndex = buffer.lastIndexOf('\n')
     if (lastNewLineIndex === -1) {
       // 如果没有换行符，缓冲区中的数据不完整，等待更多数据
-      return;
+      return
     }
 
     // 获取完整的 JSON 对象
-    const completeLines = buffer.slice(0, lastNewLineIndex);
+    const completeLines = buffer.slice(0, lastNewLineIndex)
     // 更新缓冲区，移除已处理的数据
-    buffer = buffer.slice(lastNewLineIndex + 1);
+    buffer = buffer.slice(lastNewLineIndex + 1)
 
     // 处理每一行数据
     completeLines.split('\n').forEach((line:any,) => {
@@ -548,19 +545,17 @@ const Content = (props: Props) => {
             setTimeout(() => {
               setChartRecord((prevChartRecord:any[]) => {
                 // 查找是否有匹配的 ID 来更新助手的回答
-                const foundIndex = prevChartRecord.findIndex(item => item.id === lineObj.sessionId);
-
-                // console.log("prevChartRecord: ", prevChartRecord)
+                const foundIndex = prevChartRecord.findIndex(item => item.id === lineObj.sessionId)
 
                 if (foundIndex !== -1) {
                   // 如果找到匹配的 ID，更新助手的回答
                   const updatedRecord = {
                     ...prevChartRecord[foundIndex],
                     content: lineObj.data?.answer
-                  };
-                  const newChartRecord = [...prevChartRecord];
-                  newChartRecord[foundIndex] = updatedRecord;
-                  return newChartRecord;
+                  }
+                  const newChartRecord = [...prevChartRecord]
+                  newChartRecord[foundIndex] = updatedRecord
+                  return newChartRecord
                 } else {
                   // 如果没有找到匹配的 ID，添加新的记录
                   const newRecord = {
@@ -568,19 +563,19 @@ const Content = (props: Props) => {
                     role: 'assistant',
                     content: lineObj.data?.answer,
                     isRotating: false
-                  };
-                  return [...prevChartRecord, newRecord];
+                  }
+                  return [...prevChartRecord, newRecord]
                 }
-              });
+              })
             }, 3000)
           }
         } catch (error) {
-          console.error('Failed to process line:', error);
+          console.error('Failed to process line:', error)
         }
         }
-      });
+      })
     }
-  };
+  }
 
   return (
     <main className={classNames("main")}>
@@ -590,7 +585,7 @@ const Content = (props: Props) => {
         {chatRecord()}
       </div>
     </main>
-  );
-};
+  )
+}
 
-export default Content;
+export default Content

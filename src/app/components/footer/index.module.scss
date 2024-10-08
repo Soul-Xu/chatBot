@@ -1,6 +1,5 @@
 .footer {
   position: fixed;
-  // bottom: 24px;
   bottom: 0;
   width: 400px;
   min-height: 52px;
@@ -13,7 +12,7 @@
   border-radius: 0 0 12px 12px;
 
   .content {
-    position: relative; // 设置为相对定位，用于内部元素的绝对定位
+    position: relative;
     width: 100%; // 确保内容占满整个父容器宽度
     display: flex; // 使用 flex 布局
     flex-direction: column;
@@ -23,7 +22,6 @@
 
     .input, .ant-input {
       position: fixed;
-      // bottom: 32px;
       bottom: 8px;
       flex-grow: 1; // 让输入框占据剩余空间
       width: 394px;

@@ -7,7 +7,7 @@ import Footer from './components/footer'
 export default function Home() {
   const [messages, setMessages] = useState<any>([])
   const addMessage = (message:any) => {
-    setMessages([...messages, message]);
+    setMessages([...messages, message])
   }
 
   return (
