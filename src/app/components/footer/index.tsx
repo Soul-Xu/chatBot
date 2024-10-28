@@ -52,11 +52,21 @@ const Footer = (props: Props) => {
   // 给父级页面发送信息
   // 假设在AI聊天机器人的某个函数中，比如处理完聊天消息后
   const sendChatMessageToParent = (message:any) => {
+    const host = window.location.host // 获取当前页面的host
+    let trustedOrigin = 'http://localhost:3000/ai' // 默认的trustedOrigin
+    // 检查host是否包含特定的IP地址
+    if (host.includes('172.253.168.62')) {
+      trustedOrigin = 'http://172.253.168.62:3000/ai' // 如果包含，则更新trustedOrigin
+    }
+
+    const parentOrigin = window.parent.location.origin
+    const destUrl = 'http://172.253.168.62:8080/cms-center/desktop/#/processEntrust/view'
+
     // 发送消息给父页面
     window.parent.postMessage({
       type: 'CHAT_MESSAGE',
       content: message
-    }, 'http://127.0.0.1:2771/cms-center/desktop/#/processList/List') // 替换为父页面的实际源
+    }, parentOrigin) // 替换为父页面的实际源
   }
 
   useEffect(() => {
