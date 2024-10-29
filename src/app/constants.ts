@@ -384,6 +384,18 @@ export const conversationList = [
   },
 ]
 
-export const chatGet = [
-  
+// 常见问题列表
+export const qaCommonList = [
+  {
+    id: 1,
+    title: "我要发起流程",
+    description: "我要发起流程",
+    link: "http://www.baidu.com"
+  },
+  {
+    id: 2,
+    title: "我要查询我近期的待办",
+    description: "我要查询我近期的待办",
+    link: "http://www.baidu.com"
+  }
 ]

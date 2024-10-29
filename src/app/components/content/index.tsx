@@ -13,12 +13,12 @@ import DotAnimation from "./components/dotAnimation"
 import copy from 'copy-to-clipboard'
 import { message,  Avatar } from "antd"
 import { UserOutlined, RedoOutlined } from '@ant-design/icons'
-// import { conversationList } from '@/app/constants'
 import classnames from "classnames/bind"
 import styles from "./index.module.scss"
 const classNames = classnames.bind(styles)
 // @ts-ignore
 import EventSource from "eventsource"
+import { qaCommonList } from "@/app/constants"
 
 interface Props {
   children?: React.ReactNode
@@ -34,7 +34,7 @@ const Content = (props: Props) => {
   // 添加一个answerLoading控制答案输入中还未完成的输出状态
   const [answerLoading, setAnswerLoading] = useState(false)
   // 添加一个showStopOut来控制是否显示停止输出字段
-  const [showStopOut, setShowStopOut] = useState(false)
+  // const [showStopOut, setShowStopOut] = useState(false)
   // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>(
     // conversationList.map((item) => ({ ...item, isRotating: false })),
@@ -105,22 +105,6 @@ const Content = (props: Props) => {
       </div>
     )
   }
-
-  // 常见问题列表
-  const qaCommonList = [
-    {
-      id: 1,
-      title: "我要发起流程",
-      description: "我要发起流程",
-      link: "http://www.baidu.com"
-    },
-    {
-      id: 2,
-      title: "我要查询我近期的待办",
-      description: "我要查询我近期的待办",
-      link: "http://www.baidu.com"
-    }
-  ]
 
   // 常见问题
   const qaCommon = () => {
@@ -415,14 +399,12 @@ const Content = (props: Props) => {
       setChartRecord(chartRecord.concat(newMessages))
       
       // 调用 postStreamData 并处理异步逻辑
-      (async () => {
-        const params = {
+      const params = {
           inputContent: messages?.pop(),
           sceneType: 'QA',
           sessionId: ''
         }
-        await postStreamData(params)
-      })()
+      postStreamData(params)
     }
   }, [messages])
 
@@ -470,25 +452,31 @@ const Content = (props: Props) => {
   // stream-post
   const postStreamData = async (data:any) => {
     setIsLoading(true)
-    // const postUrl = 'http://81.69.218.11/data/test/stream-post'
-    // const postUrl = 'http://172.253.168.62:9201/data/aiAgent/chat'
     let postUrl = ''
 
-    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
-    const baseUrl2 = 'http://172.253.168.62:9201/data/aiAgent/chat'
-    const sitUrl = 'http://172.253.168.62:8080/web/#/'
+    // const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
+    const baseUrl2 = 'http://172.253.168.62:8080/lite/data/chatbot/chat'
+    const sitUrl = 'http://172.253.168.62:8080'
 
-    // 获取当前页面的 URL
+    // // 获取当前页面的 URL
     const currentUrl = window.location.href
 
-    // 判断当前 URL 是否包含特定的 URL 段
-    if (currentUrl.includes(sitUrl)) {
-      // 如果包含特定的 URL 段，则使用第二个 URL
-      postUrl = baseUrl2
-    } else {
-      // 否则使用第一个 URL
-      postUrl = baseUrl1
-    }
+    console.log('currentUrl', currentUrl)
+
+    console.log('change-url', currentUrl.includes(sitUrl))
+
+    // // 判断当前 URL 是否包含特定的 URL 段
+    // if (currentUrl.includes(sitUrl)) {
+    //   // 如果包含特定的 URL 段，则使用第二个 URL
+    //   postUrl = baseUrl2
+    // } else {
+    //   // 否则使用第一个 URL
+    //   postUrl = baseUrl1
+    // }
+
+    postUrl = baseUrl2
+
+    console.log('postUrl', postUrl)
 
     const response:any = await fetch(postUrl, {
       method: 'POST',
