@@ -454,18 +454,14 @@ const Content = (props: Props) => {
     setIsLoading(true)
     let postUrl = ''
 
-    // const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
+    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
     const baseUrl2 = 'http://172.253.168.62:8080/lite/data/chatbot/chat'
     const sitUrl = 'http://172.253.168.62:8080'
 
     // // 获取当前页面的 URL
     const currentUrl = window.location.href
 
-    console.log('currentUrl', currentUrl)
-
-    console.log('change-url', currentUrl.includes(sitUrl))
-
-    // // 判断当前 URL 是否包含特定的 URL 段
+    // 判断当前 URL 是否包含特定的 URL 段
     // if (currentUrl.includes(sitUrl)) {
     //   // 如果包含特定的 URL 段，则使用第二个 URL
     //   postUrl = baseUrl2
@@ -475,8 +471,6 @@ const Content = (props: Props) => {
     // }
 
     postUrl = baseUrl2
-
-    console.log('postUrl', postUrl)
 
     const response:any = await fetch(postUrl, {
       method: 'POST',
