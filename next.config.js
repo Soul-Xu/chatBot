@@ -9,7 +9,7 @@ const nextConfig = {
   experimental: {
     optimizeFonts: false,
   },
-  basePath: '/aiagent/web'
+  basePath: '/chatbot/web'
 }
 
 module.exports = nextConfig

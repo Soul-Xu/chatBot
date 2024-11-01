@@ -399,3 +399,9 @@ export const qaCommonList = [
     link: "http://www.baidu.com"
   }
 ]
+
+// {
+//   id: 1730423311783,
+//   content: '1111',
+//   role: 'user',
+// }

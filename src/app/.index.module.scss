@@ -1,0 +1,13 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 400px;
+  position: fixed;
+  left: 50%; /* 将左侧位置设置为视口宽度的50% */
+  transform: translateX(-50%); /* 仅在水平方向上移动元素宽度的50% */
+  margin: 0 auto; /* 这一行其实在这种情况下不会起作用，因为fixed定位的元素不受自动外边距影响 */
+  box-sizing: border-box; /* 添加这一行 */
+}

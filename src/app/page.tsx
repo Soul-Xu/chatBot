@@ -4,6 +4,9 @@ import Header from './components/header'
 import Content from './components/content'
 import Footer from './components/footer'
 import Error from 'next/error'
+import classnames from "classnames/bind"
+import styles from "./.index.module.scss"
+const classNames = classnames.bind(styles)
 
 // @ts-ignore
 export default function Home(props) {
@@ -18,12 +21,10 @@ export default function Home(props) {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center" style={{ borderRadius: '12px' }}>
-      <div className="z-10 items-center justify-between">
-        <Header />
-        <Content messages={messages} />
-        <Footer onSendMessage={addMessage} />
-      </div>
+    <main className={classNames("main-container")}>
+      <Header />
+      <Content messages={messages} />
+      <Footer onSendMessage={addMessage} />
     </main>
   )
 }
