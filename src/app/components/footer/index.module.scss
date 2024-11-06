@@ -15,9 +15,8 @@
     position: relative;
     width: 100%; // 确保内容占满整个父容器宽度
     display: flex; // 使用 flex 布局
-    flex-direction: column;
-    align-items: stretch; // 或者 flex-start，取决于您想要的布局
-    justify-content: flex-end; // 使按钮固定在底部
+    align-items: center; // 或者 flex-start，取决于您想要的布局
+    justify-content: center; // 使按钮固定在底部
     padding: 0 4px;
 
     .input, .ant-input {

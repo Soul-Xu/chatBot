@@ -376,7 +376,6 @@ const Content = (props: Props) => {
 
   useEffect(() => {
     scrollToBottom()
-    console.log('chartRecord', chartRecord)
   }, [chartRecord]) // 监听 chartRecord 的变化
 
   const scrollToBottom = () => {
@@ -389,7 +388,7 @@ const Content = (props: Props) => {
     if (messages?.length > 0) {
       const newMessages:any = messages?.map((content, index) => {
         return {
-          id: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
+          sessionId: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
           role: "user",
           content: content
         }
@@ -405,15 +404,16 @@ const Content = (props: Props) => {
         }
       postStreamData(params)
     }
-  }, [messages])
+  }, [messages, chartRecord])
 
   // stream-post
   const postStreamData = async (data:any) => {
     setIsLoading(true)
     let postUrl = ''
 
-    const baseUrl1 = 'http://81.69.218.11/data/test/stream-post'
-    const baseUrl2 = 'http://172.253.168.62:8080/aiagent/api/data/chatbot/chat'
+    const baseUrlLocal = 'http://81.69.218.11/data/test/stream-post'
+    const baseUrlSit = 'http://172.253.168.62:8080/aiagent/api/data/chatbot/chat'
+    const baseUrlUat = 'https://workflow-uat.newone.com.cn/aiagent/api/data/chatbot/chat '
     const sitUrl = 'http://172.253.168.62:8080'
 
     // // 获取当前页面的 URL
@@ -422,10 +422,12 @@ const Content = (props: Props) => {
     // 判断当前 URL 是否包含特定的 URL 段
     if (currentUrl.includes(sitUrl)) {
       // 如果包含特定的 URL 段，则使用第二个 URL
-      postUrl = baseUrl2
-    } else {
+      postUrl = baseUrlSit
+    } else if(currentUrl.includes('uat')) {
       // 否则使用第一个 URL
-      postUrl = baseUrl1
+      postUrl = baseUrlUat
+    } else {
+      postUrl = baseUrlLocal
     }
 
     const response:any = await fetch(postUrl, {
@@ -468,57 +470,54 @@ const Content = (props: Props) => {
     // 更新缓冲区，移除已处理的数据
     buffer = buffer.slice(lastNewLineIndex + 1);
 
-    // // 处理每一行数据
-    // completeLines.split('\n').forEach((line) => {
-    //   if (line) {
-    //     try {
-    //       const lineObj = JSON.parse(line.split('data:')[1]);
+    // 处理每一行数据
+    completeLines.split('\n').forEach((line) => {
+      if (line) {
+        try {
+          const lineObj = JSON.parse(line.split('data:')[1]);
 
-    //       if (lineObj.done === true) {
-    //         // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
-    //         setAnswerLoading(false);
-    //       } else {
-    //         setIsLoading(false);
-    //         setAnswerLoading(true);
-    //         setChartRecord((prevChartRecord:any) => {
-    //           console.log('prevChartRecord', prevChartRecord)
-
-    //           // 查找是否有匹配的 sessionId 来更新助手的回答
-    //           const foundIndex = prevChartRecord.findIndex((item:any) => item.sessionId === lineObj.sessionId);
-    //           // const foundIndex = prevChartRecord.length - 1
-    //           console.log('foundIndex', foundIndex)
-    //           if (foundIndex !== -1) {
-    //             console.log('type-1', foundIndex, prevChartRecord)
-    //             // 如果找到匹配的 sessionId，更新助手的回答
-    //             const updatedRecord = {
-    //               // ...prevChartRecord[foundIndex],
-    //               sessionId: lineObj.sessionId, // 使用 sessionId 而不是 id
-    //               // role: 'assistant',
-    //               isRotating: false,
-    //               content: lineObj.data?.answer,
-    //             };
-    //             const newChartRecord = [...prevChartRecord];
-    //             newChartRecord[foundIndex] = updatedRecord;
-    //             console.log('newChartRecord', newChartRecord)
-    //             return newChartRecord;
-    //           } else {
-    //             console.log('type-2', foundIndex, prevChartRecord)
-    //             // 如果没有找到匹配的 sessionId，添加新的记录
-    //             const newRecord = {
-    //               sessionId: lineObj.sessionId, // 使用 sessionId 而不是 id
-    //               role: 'assistant',
-    //               content: lineObj.data?.answer,
-    //               isRotating: false,
-    //             };
-    //             return [...prevChartRecord, newRecord];
-    //           }
-    //         });
-    //       }
-    //     } catch (error) {
-    //       console.error('Failed to process line:', error);
-    //     }
-    //   }
-    // });
+          if (lineObj.done === true) {
+            // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
+            setAnswerLoading(false);
+          } else {
+            setIsLoading(false);
+            setAnswerLoading(true);
+            setChartRecord((prevChartRecord:any) => {
+              // 查找是否有匹配的 sessionId 来更新助手的回答
+              const foundIndex = prevChartRecord.findIndex((item:any) => {
+                if(item.sessionId === lineObj.sessionId) {
+                  return item
+                }
+              });
+              if (foundIndex !== -1) {
+                // 如果找到匹配的 sessionId，更新助手的回答
+                const updatedRecord = {
+                  ...prevChartRecord[foundIndex],
+                  sessionId: lineObj.sessionId, // 使用 sessionId 而不是 id
+                  role: 'assistant',
+                  isRotating: false,
+                  content: lineObj.data?.answer,
+                };
+                const newChartRecord = [...prevChartRecord];
+                newChartRecord[foundIndex] = updatedRecord;
+                return newChartRecord;
+              } else {
+                // 如果没有找到匹配的 sessionId，添加新的记录
+                const newRecord = {
+                  sessionId: lineObj.sessionId, // 使用 sessionId 而不是 id
+                  role: 'assistant',
+                  content: lineObj.data?.answer,
+                  isRotating: false,
+                };
+                return [...prevChartRecord, newRecord];
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Failed to process line:', error);
+        }
+      }
+      });
     }
   }
 
