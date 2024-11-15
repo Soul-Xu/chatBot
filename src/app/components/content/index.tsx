@@ -194,90 +194,102 @@ const Content = (props: Props) => {
     )
   }
 
-  // 跳转列表
-  const jumpList = (list: Array<any>) => {
-    return (
-      <div>
-        <div className={classNames("assistant-content-list")}>
-          {
-            list.map((item:any) => {
-              return (
-                <Link 
-                  className={classNames("assistant-item")} 
-                  href={item.link}
-                  key={item.id} 
-                  target="_blank"
-                >
-                  <span className={classNames("assistant-item-title")}>
-                    {item.title}
-                  </span>
-                  {
-                    item?.linkIcon && (
-                      <span className={classNames("assistant-item-link")}>
-                        <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
-                      </span>
-                    )
-                  }
-                </Link>
-              )
-            }
-            )
-          }
-        </div>
-      </div>
-    )
-  }
+  // // 跳转列表
+  // const jumpList = (list: Array<any>) => {
+  //   return (
+  //     <div>
+  //       <div className={classNames("assistant-content-list")}>
+  //         {
+  //           list.map((item:any) => {
+  //             return (
+  //               <Link 
+  //                 className={classNames("assistant-item")} 
+  //                 href={item.link}
+  //                 key={item.id} 
+  //                 target="_blank"
+  //               >
+  //                 <span className={classNames("assistant-item-title")}>
+  //                   {item.title}
+  //                 </span>
+  //                 {
+  //                   item?.linkIcon && (
+  //                     <span className={classNames("assistant-item-link")}>
+  //                       <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
+  //                     </span>
+  //                   )
+  //                 }
+  //               </Link>
+  //             )
+  //           }
+  //           )
+  //         }
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
-  // 查看详情跳转
-  const jumpDetail = (item: any) => {
-    return (
-      <div className={classNames("assistant-content-detail")}>
-        <Link href={item.detailUrl} target="_blank">
-          查看详情
-        </Link>
-        <span className={classNames("assistant-detail-link")}>
-          <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
-        </span>
-      </div>
-    )
-  }
+  // // 查看详情跳转
+  // const jumpDetail = (item: any) => {
+  //   return (
+  //     <div className={classNames("assistant-content-detail")}>
+  //       <Link href={item.detailUrl} target="_blank">
+  //         查看详情
+  //       </Link>
+  //       <span className={classNames("assistant-detail-link")}>
+  //         <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12}  />
+  //       </span>
+  //     </div>
+  //   )
+  // }
 
-  // 二级标题列表
-  const subTitleList = (list: Array<any>) => {
-    return (
-      <div className={classNames("assistant-content-list")}>
-        {
-          list.map((item:any) => {
-            return (
-              <div
-                className={classNames("assistant-text-item")} 
-                key={item.id} 
-              >
-                <span className={classNames(
-                  {
-                    "assistant-text-item-main": item.type === "sub",
-                    "assistant-text-item-description": item.type !== "sub"
-                  }
-                )}>
-                  {item.title}
-                </span>
-                <span className={classNames("assistant-text-item-description")}>
-                  {item.description}
-                  {item.textLoading && 
-                    <span 
-                      className={classNames("loading")}
-                    >
-                      <RedoOutlined className={classNames('rotate-animation-infinite')} />
-                    </span>
-                  }
-                </span>
-              </div>
-            )
-          }
-          )
-        }
-      </div>
-    )
+  // // 二级标题列表
+  // const subTitleList = (list: Array<any>) => {
+  //   return (
+  //     <div className={classNames("assistant-content-list")}>
+  //       {
+  //         list.map((item:any) => {
+  //           return (
+  //             <div
+  //               className={classNames("assistant-text-item")} 
+  //               key={item.id} 
+  //             >
+  //               <span className={classNames(
+  //                 {
+  //                   "assistant-text-item-main": item.type === "sub",
+  //                   "assistant-text-item-description": item.type !== "sub"
+  //                 }
+  //               )}>
+  //                 {item.title}
+  //               </span>
+  //               <span className={classNames("assistant-text-item-description")}>
+  //                 {item.description}
+  //                 {item.textLoading && 
+  //                   <span 
+  //                     className={classNames("loading")}
+  //                   >
+  //                     <RedoOutlined className={classNames('rotate-animation-infinite')} />
+  //                   </span>
+  //                 }
+  //               </span>
+  //             </div>
+  //           )
+  //         }
+  //         )
+  //       }
+  //     </div>
+  //   )
+  // }
+
+  // const content = "报销流程的设计会因组织和行业的不同而有所差异，但通常会包括以下几个关键步骤：\n\n1. **申请报销**：员工提交详细的费用报告，包括日期、费用类型、金额、供应商信息以及相关凭证（如收据或发票的复印件）。\n\n2. **审批权限**：设置审批层级，可能包括直线经理的初步审批，财务部门的复核，以及在某些情况下，可能还需要更高层级的管理人员批准。\n\n3. **合规检查**：确保所有费用符合公司政策和法规要求，例如，是否超出预算是不是合理的且是否有适当的凭证支持。\n\n4. **支付处理**：一旦报销申请获得批准，财务部门将处理付款，这可能包括转账到员工的银行账户或者以现金形式发放。\n\n5. **记录和报告**：将报销信息录入会计系统，以便进行财务报告和税务报告。\n\n6. **审计跟踪**：保留报销单据和记录，以备后续审计或调查之需。\n\n每个公司的报销流程可能会根据其具体需求和规模有所不同，但以上步骤提供了一个通用框架。设计时应考虑流程的效率、控制和灵活性，确保既能防止欺诈又能满足不同角色和部门之间的有效沟通。"
+
+  const rawContent = (content: string) => {
+    // 替换换行符为 <br> 标签
+    const contentWithBreaks = content.replace(/\n/g, '<br>');
+
+    // 替换加粗标记为 <strong> 标签
+    const contentWithStrong = contentWithBreaks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    return contentWithStrong
   }
 
   // 聊天记录
@@ -316,7 +328,7 @@ const Content = (props: Props) => {
                               </span> 
                               : <div>
                                   <span className={classNames("assistant-content-title")}>
-                                    {item.content}
+                                    <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>
                                     {
                                       answerLoading && (
                                         <span 
@@ -329,12 +341,12 @@ const Content = (props: Props) => {
                                   </span>
                               </div>
                             }
-                            { item.list && item.list.length > 0 && (jumpList(item.list))}
+                            {/* { item.list && item.list.length > 0 && (jumpList(item.list))}
                             { item.detailUrl && jumpDetail(item)}
                             { item.mainTitle && <div className={classNames("assistant-main-title")} >{item.mainTitle}</div>}
                             { item.textList && item.textList.length > 0 && subTitleList(item.textList) }
                             { item.detailTitle && <div className={classNames("assistant-detail-title")} >{item.detailTitle}</div>}
-                            { item.detailDesc && <div className={classNames("assistant-detail-desc")} >{item.detailDesc}</div>}
+                            { item.detailDesc && <div className={classNames("assistant-detail-desc")} >{item.detailDesc}</div>} */}
                             <div className={classNames("assistant-content-action")}>
                               <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
                                 <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
@@ -375,6 +387,7 @@ const Content = (props: Props) => {
   }
 
   useEffect(() => {
+    console.log('chartRecord', chartRecord)
     scrollToBottom()
   }, [chartRecord]) // 监听 chartRecord 的变化
 
