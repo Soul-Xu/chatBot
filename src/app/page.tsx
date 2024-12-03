@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import Header from './components/header'
 import Content from './components/content'
 import Footer from './components/footer'

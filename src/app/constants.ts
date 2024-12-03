@@ -400,8 +400,23 @@ export const qaCommonList = [
   }
 ]
 
-// {
-//   id: 1730423311783,
-//   content: '1111',
-//   role: 'user',
-// }
+const tl_launch = [
+  {
+    order: 1,
+    templateId: "fc78b39296aa4eeeb4926441ef8a8dad",
+    templateName: "加班流程",
+    url: "http://www.baidu.com"
+  },
+  {
+    order: 2,
+    templateId: "733d4a433be94a76965fbbc19972ab7e",
+    templateName: "请假流程",
+    url: "http://www.baidu.com"
+  },
+  {
+    order: 3,
+    templateId: "d45e481c69f147418b78247d7efc7395",
+    templateName: "出差流程",
+    url: "http://www.baidu.com"
+  },
+]

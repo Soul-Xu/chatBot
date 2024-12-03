@@ -1,0 +1,110 @@
+.assistant {
+  display: flex;
+  justify-content: flex-start;
+  box-sizing: border-box;
+
+  .assistant-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    width: 32px;
+    height: 32px;
+    background: #FFFFFF;
+    border: 1px solid #FFFFFF;
+    border-radius: 50%;
+  }
+  
+  .assistant-content {
+    margin-top: 8px;
+    width: 297px;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 8px 12px;
+
+    &-title {
+      font-size: 14px;
+      height: 20px;
+      line-height: 20px;
+      text-align: left;
+      color: #333333;
+    }
+    &-list {
+      margin-top: 8px;
+
+      .assistant-item {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        line-height: 20px;
+        text-align: left;
+        cursor: pointer;
+        margin-bottom: 10px;
+
+        &-title {
+          margin-right: 4px;
+          color: #BF832E;
+        }
+
+        &-link {
+          color: #BF832E;
+        }
+      }
+
+      .assistant-text-item {
+        font-size: 14px;
+        line-height: 20px;
+        text-align: left;
+        cursor: pointer;
+        margin-bottom: 10px;
+
+          &-main {
+          font-weight: 700;
+        }
+
+        &-description {
+          font-weight: 400;
+        }
+      }
+      
+      .assistant-item:last-child {
+        margin-bottom: 8px;
+      }
+    }
+    &-detail {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: #BF832E;
+      line-height: 20px;
+      height: 20px;
+      text-align: left;
+      cursor: pointer;
+      margin-bottom: 10px;
+      margin-right: 4px;
+    }
+    &-action {
+      display: flex;
+      align-items: center;
+
+      .action-box {
+        display: flex;
+        align-items: center;
+        margin-right: 12px;
+        cursor: pointer;
+
+        .action-box-text {
+          font-size: 12px;
+          line-height: 16px;
+          height: 16px;
+          color: #8B8D93;
+        }
+      }
+    }
+    &-picLoading {
+      width: 273px;
+      height: 196px;
+      background: linear-gradient( 270deg, #FAFAFA 0%, #E4E0E0 51%, #FBFBFB 100%);
+    }
+  }
+}

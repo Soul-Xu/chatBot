@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 创建一个 Axios 实例
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api', // 基础 URL，根据你的后端 API 来配置
+  baseURL: 'http://81.69.218.11:9140/data', // 基础 URL，根据你的后端 API 来配置
   timeout: 10000, // 请求超时时间
 });
 
