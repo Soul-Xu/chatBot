@@ -213,21 +213,30 @@ const Content = (props: Props) => {
             if (lineObj.done === true) {
               // 使用回调函数确保状态更新完成
               setChartRecord((prevChartRecord:any) => {
-                const questionObj = prevChartRecord[0]
-                const answerObj = prevChartRecord[1]
-                const params = {
-                  id: answerObj.id,
-                  sessionId: answerObj.sessionId,
-                  userCode: 'chenhaiyong',
-                  question: questionObj.content,
-                  answer: JSON.stringify(answerObj.data),
-                  createTime: nowTime,
-                  intent: answerObj.intent,
+                console.log('prevChartRecord', prevChartRecord)
+                if (prevChartRecord.length === 0) {
+                  return prevChartRecord
                 }
-                // @ts-ignore
-                dispatch(pushChat(params))
-                // 这里是更新状态的逻辑
-                return prevChartRecord; // 假设这里没有修改，只是返回当前状态
+                if (prevChartRecord.length === 1) {
+                  return prevChartRecord
+                }
+                if (prevChartRecord.length === 2) {
+                  const questionObj = prevChartRecord[0]
+                  const answerObj = prevChartRecord[1]
+                  const params = {
+                    id: answerObj.id,
+                    sessionId: answerObj.sessionId,
+                    userCode: 'chenhaiyong',
+                    question: questionObj.content,
+                    answer: JSON.stringify(answerObj.data),
+                    createTime: nowTime,
+                    intent: answerObj.intent,
+                  }
+                  // @ts-ignore
+                  dispatch(pushChat(params))
+                  // 这里是更新状态的逻辑
+                  return prevChartRecord; // 假设这里没有修改，只是返回当前状态
+                }
               });
               // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
               setAnswerLoading(false);
