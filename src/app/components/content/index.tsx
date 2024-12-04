@@ -6,14 +6,12 @@ import ImgCopyAction from "@/public/images/copy_action.png"
 import ImgRefreshAction from "@/public/images/refresh_action.png"
 import DotAnimation from "./components/dotAnimation"
 import TextLoading from "./components/textLoading"
-import TextLoadingStopOut from "./components/stopOut"
-import PicLoading from "./components/picLoading"
 import JumpList from "./components/jumpList"
 import JumpDetail from "./components/jumpDetail"
 import copy from 'copy-to-clipboard'
 import { message,  Avatar } from "antd"
 import { useDispatch, useSelector } from 'react-redux';
-import { getChatResponse, pushChat } from '@/lib/features/slices/agentSlice'
+import { pushChat } from '@/lib/features/slices/agentSlice'
 import { UserOutlined, RedoOutlined } from '@ant-design/icons'
 import classnames from "classnames/bind"
 import styles from "./index.module.scss"
@@ -54,42 +52,6 @@ const Content = (props: Props) => {
     }
     postStreamData(params)
   }
-
-  // // 处理点击"再试一次"的事件
-  // const handleTryAgainClick = (item: any) => {
-  //   console.log("handleTryAgainClick", item);
-  //   // 在这里执行你的操作
-  //   const params = {
-  //     inputContent: item.question,
-  //     sessionId: item.sessionId
-  //   };
-  //   // 找到对应记录的索引
-  //   const recordIndex = chartRecord.findIndex((record: any) => record.sessionId === item.sessionId);
-  //   if (recordIndex !== -1) {
-  //     // 更新对应记录的状态，以便重新渲染
-  //     setChartRecord((prevChartRecord: any) => {
-  //       const newChartRecord = [...prevChartRecord];
-  //       // 设置旋转状态，表示正在重新请求
-  //       newChartRecord[recordIndex] = {
-  //         ...newChartRecord[recordIndex],
-  //         isRotating: true
-  //       };
-  //       return newChartRecord;
-  //     });
-  //     // 调用 postStreamData 并处理异步逻辑
-  //     postStreamData(params).then(() => {
-  //       // 请求完成后，清除旋转状态
-  //       setChartRecord((prevChartRecord: any) => {
-  //         const newChartRecord = [...prevChartRecord];
-  //         newChartRecord[recordIndex] = {
-  //           ...newChartRecord[recordIndex],
-  //           isRotating: false
-  //         };
-  //         return newChartRecord;
-  //       });
-  //     });
-  //   }
-  // };
 
   // 开场白
   const openingStatement = () => {
@@ -213,7 +175,6 @@ const Content = (props: Props) => {
             if (lineObj.done === true) {
               // 使用回调函数确保状态更新完成
               setChartRecord((prevChartRecord:any) => {
-                console.log('prevChartRecord', prevChartRecord)
                 if (prevChartRecord.length === 0) {
                   return prevChartRecord
                 }
@@ -243,87 +204,101 @@ const Content = (props: Props) => {
             } else {
               setIsLoading(false);
               setAnswerLoading(true);
-              // 检查intent是否为'tl_launch'
               if (lineObj.intent === 'tl_launch') {
                 setCurrentScene('tl_launch')
-                // 更新chartRecord，将JumpList组件作为内容的一部分
-                setChartRecord((prevChartRecord:any) => [
-                  ...prevChartRecord,
-                  {
-                    id: lineObj.id,
-                    sessionId: lineObj.sessionId,
-                    userCode: 'chenhaiyong',
-                    question: prevChartRecord[0].content,
-                    createTime: lineObj.createTime,
-                    role: 'assistant',
-                    intent: lineObj.intent,
-                    data: lineObj.data,
-                    // @ts-ignore
-                    content: <JumpList messageTip={prevChartRecord[0].content} listData={lineObj.data} />,
-                    isRotating: false,
-                  },
-                ]);
+                setChartRecord((prevChartRecord:any) => {
+                  // 获取倒数第二个元素作为question的值
+                  const questionContent = prevChartRecord[prevChartRecord.length - 2]?.content || '';
+
+                  // 创建一个新数组，其中最后一个元素被新的对象替换
+                  const updatedRecords = [
+                    ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                    {
+                      id: lineObj.id,
+                      sessionId: lineObj.sessionId,
+                      userCode: 'chenhaiyong',
+                      question: questionContent, // 使用倒数第二个元素的内容
+                      createTime: lineObj.createTime,
+                      role: 'assistant',
+                      intent: lineObj.intent,
+                      data: lineObj.data,
+                      content: <JumpList messageTip={questionContent} listData={lineObj.data} />,
+                      isRotating: false,
+                    },
+                  ];
+
+                  return updatedRecords;
+                });
               }
-              // 检查intent是否为'tl_generate'
               if (lineObj.intent === 'tl_generate') {
                 setCurrentScene('tl_generate')
                 setChartRecord((prevChartRecord:any) => {
-                  // 查找是否有匹配的 sessionId 来更新助手的回答
-                  const foundIndex = prevChartRecord.findIndex((item:any) => {
-                    if(item.sessionId === lineObj.sessionId) {
-                      return item
-                    }
-                  });
-                  if (foundIndex !== -1) {
-                    // 如果找到匹配的 sessionId，更新助手的回答
+                  // 检查数组是否至少有一个元素
+                  if (prevChartRecord.length > 0) {
+                    // 获取最后一个元素
+                    const lastRecord = prevChartRecord[prevChartRecord.length - 1];
+                    // 更新最后一个元素的内容，假设最后一个元素是 loading 状态
                     const updatedRecord = {
-                      ...prevChartRecord[foundIndex],
-                      sessionId: lineObj.sessionId, // 使用 sessionId 而不是 id
+                      ...lastRecord,
+                      id: lineObj.id,
+                      createTime: lineObj.createTime,
+                      userCode: 'chenhaiyong',
                       role: 'assistant',
-                      isRotating: false,
-                      content: lineObj.data?.answer,
+                      intent: lineObj.intent,
+                      data: lineObj.data,
+                      isLoading: false,
+                      isRotating: false, // 假设 isRotating 表示 loading 状态
+                      content: lineObj.data?.answer, // 替换为实际的回答内容
                     };
-                    const newChartRecord = [...prevChartRecord];
-                    newChartRecord[foundIndex] = updatedRecord;
-                    return newChartRecord;
+                    // 创建一个新数组，其中最后一个元素被更新后的记录替换
+                    const renderRecord = [
+                      ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                      updatedRecord, // 添加更新后的最后一个元素
+                    ];
+                    return renderRecord
                   } else {
-                    // 如果没有找到匹配的 sessionId，添加新的记录
+                    // 如果 prevChartRecord 为空，则添加一个新的记录
                     const newRecord = {
                       id: lineObj.id,
-                      sessionId: lineObj.sessionId,
                       userCode: 'chenhaiyong',
                       createTime: lineObj.createTime,
                       role: 'assistant',
                       intent: lineObj.intent,
                       data: lineObj.data,
-                      content: lineObj.data?.answer,
-                      isRotating: false,
+                      content: lineObj.data?.answer, // 这里应该是实际的回答内容
+                      isRotating: false, // 不需要 loading 状态
                     };
-                    return [...prevChartRecord, newRecord];
+                    return [newRecord];
                   }
                 });
               }
-              // 检查intent是否为''
+              // 检查intent是否为'tl_query'
               if (lineObj.intent === 'tl_query') {
-                console.log('tl_query', lineObj.data)
-                setCurrentScene('tl_query')
-                // 更新chartRecord，将JumpList组件作为内容的一部分
-                setChartRecord((prevChartRecord:any) => [
-                  ...prevChartRecord,
-                  {
-                    id: lineObj.id,
-                    sessionId: lineObj.sessionId,
-                    userCode: 'chenhaiyong',
-                    question: prevChartRecord[0].content,
-                    createTime: lineObj.createTime,
-                    role: 'assistant',
-                    intent: lineObj.intent,
-                    data: lineObj.data,
-                    // @ts-ignore
-                    content: <JumpDetail item={lineObj.data} />,
-                    isRotating: false,
-                  },
-                ]);
+                setCurrentScene('tl_query');
+                setChartRecord((prevChartRecord: any) => {
+                  // 获取倒数第二个元素作为question的值
+                  const questionContent = prevChartRecord[prevChartRecord.length - 2]?.content || '';
+
+                  // 创建一个新数组，其中添加了新的对象
+                  const updatedRecords = [
+                    ...prevChartRecord.slice(0, -1), // 包含之前所有元素
+                    {
+                      id: lineObj.id,
+                      sessionId: lineObj.sessionId,
+                      userCode: 'chenhaiyong',
+                      question: questionContent, // 使用倒数第二个元素的内容
+                      createTime: lineObj.createTime,
+                      role: 'assistant',
+                      intent: lineObj.intent,
+                      data: lineObj.data,
+                      // @ts-ignore
+                      content: <JumpDetail item={lineObj.data} />,
+                      isRotating: false,
+                    },
+                  ];
+
+                  return updatedRecords;
+                });
               }
             }
           } catch (error) {
@@ -334,123 +309,124 @@ const Content = (props: Props) => {
     }
   }
 
-  // 聊天记录
   const chatRecord = () => {
-    return (
-      <div className={classNames("chat-record")}>
-        {
-          chartRecord?.map((item: any, index: number) => {
-            const key = item.id ? item.id : `record-${index}`;
-            return (
-              <div className={classNames("record-item")} key={key}>
-                {
-                  item.role === "user" ? (
-                    <div className={classNames("user")}>
-                      <div className={classNames("user-content")}>
-                        <span>{item?.content}</span>
-                        <div className={classNames("user-content-action")} onClick={() => handleCopy(item.content)}>
+  return (
+    <div className={classNames("chat-record")}>
+      {
+        chartRecord?.map((item: any, index: number) => {
+          const key = item.id ? item.id : `record-${index}`;
+          return (
+            <div className={classNames("record-item")} key={key}>
+              {
+                item.role === "user" ? (
+                  <div className={classNames("user")}>
+                    <div className={classNames("user-content")}>
+                      <span>{item?.content}</span>
+                      <div className={classNames("user-content-action")} onClick={() => handleCopy(item.content)}>
+                        <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
+                        <span className={classNames("action-box-text")}>复制</span>
+                      </div>
+                    </div>
+                    <div className={classNames("user-avatar")}>
+                      <Avatar size={32} icon={<UserOutlined />} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className={classNames("assistant")}>
+                    <div className={classNames("assistant-avatar")}>
+                      <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+                    </div>
+                    <div className={classNames("assistant-content")}>
+                      {
+                        item.isLoading ? (
+                          <span className={classNames("assistant-content-title")}>
+                            <DotAnimation />
+                          </span>
+                        ) : (
+                          <div>
+                            <span className={classNames("assistant-content-title")}>
+                              {currentScene === 'tl_generate' && <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>}
+                              {currentScene === 'tl_launch' && <div>{item?.content}</div>}
+                              {currentScene === 'tl_query' && <div>{item?.content}</div>}
+                              {
+                                item.isRotating && (
+                                  <span className={classNames("loading")}>
+                                    <RedoOutlined className={classNames('rotate-animation-infinite')} />
+                                  </span>
+                                )
+                              }
+                            </span>
+                          </div>
+                        )
+                      }
+                      <div className={classNames("assistant-content-action")}>
+                        <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
                           <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
                           <span className={classNames("action-box-text")}>复制</span>
-                        </div>
+                        </span>
+                        <span className={classNames("action-box")}>
+                          <Image
+                            src={ImgRefreshAction}
+                            alt="再试一次"
+                            width={20}
+                            height={20}
+                            className={classNames({ 'rotate-animation': item.isRotating })}
+                          />
+                          <span
+                            className={classNames("action-box-text")}
+                            onClick={() => handleTryAgainClick(item)}
+                          >再试一次</span>
+                        </span>
                       </div>
-                      <div className={classNames("user-avatar")}>
-                        <Avatar size={32} icon={<UserOutlined />} />
-                      </div>
                     </div>
-                  ) : item.type !== "stopOutput" && item.type !== "answerLoading" && item.type !== "picLoading" ?
-                  (
-                    <div>
-                      <div className={classNames("assistant")}>
-                          <div className={classNames("assistant-avatar")}>
-                            <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                          </div>                  
-                          <div className={classNames("assistant-content")}>
-                            { isLoading 
-                              ? <span className={classNames("assistant-content-title")}>
-                                <DotAnimation />
-                              </span> 
-                              : <div>
-                                  <span className={classNames("assistant-content-title")}>
-                                    { currentScene === 'tl_generate' && <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>}
-                                    { currentScene === 'tl_launch' && <div>{item?.content}</div>}   
-                                    { currentScene === 'tl_query' && <div>{item?.content}</div>}  
-                                    {
-                                      answerLoading && (
-                                        <span 
-                                          className={classNames("loading")}
-                                        >
-                                          <RedoOutlined className={classNames('rotate-animation-infinite')} />
-                                        </span>
-                                      )
-                                    }
-                                  </span>
-                              </div>
-                            }
-                            <div className={classNames("assistant-content-action")}>
-                              <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
-                                <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
-                                <span className={classNames("action-box-text")}>复制</span>
-                              </span>
-                              <span className={classNames("action-box")}>
-                                <Image 
-                                  src={ImgRefreshAction} 
-                                  alt="再试一次" 
-                                  width={20} 
-                                  height={20}
-                                  className={classNames({ 'rotate-animation': item.isRotating })}
-                                />
-                                <span 
-                                  className={classNames("action-box-text")} 
-                                  onClick={() => handleTryAgainClick(item)}
-                                >再试一次</span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                    </div>
-                  ) : (
-                    <div>
-                    { item.type === "stopOutput" && <TextLoadingStopOut />}
-                    { item.type === "answerLoading" && <TextLoading />}
-                    { item.type === "picLoading" && <PicLoading />}
-                    </div>
-                  )
-                }
-              </div>
-            )
-          })
-        }
-        <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
-      </div>
-    )
-  }
+                  </div>
+                )
+              }
+            </div>
+          );
+        })
+      }
+      <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
+    </div>
+  );
+};
+
 
   const scrollToBottom = () => {
     // @ts-ignore
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+   // 调整后的 useEffect，用于处理新的消息
   useEffect(() => {
-    // @ts-ignore
-    if (messages?.length > 0) {
-      const newMessages:any = messages?.map((content, index) => {
-        return {
-          sessionId: Date.now() + index, // 使用当前时间戳加上索引来确保id的唯一性
+    if (messages && messages?.length > 0) {
+      const newMessage = messages[messages.length - 1];
+      const newMessagesArray = [
+        ...chartRecord,
+        {
+          sessionId: Date.now(), // 使用时间戳作为 sessionId
           role: "user",
-          content: content
+          content: newMessage
+        },
+        {
+          sessionId: Date.now(), // 使用时间戳作为 sessionId
+          role: "assistant",
+          content: <TextLoading />, // 显示加载组件
+          isLoading: true // 添加一个 isLoading 标志
         }
-      }) || []
-      // @ts-ignore
-      setChartRecord(chartRecord.concat(newMessages))
-      setIsLoading(true)
+      ];
+      setChartRecord(newMessagesArray);
+      setIsLoading(true);
+
       // 调用 postStreamData 并处理异步逻辑
       const params = {
-          inputContent: messages?.pop(),
-          sessionId: ''
-        }
+        inputContent: newMessage,
+        sessionId: '' // 使用时间戳作为 sessionId
+      };
+      // 模拟异步请求后端数据
       postStreamData(params)
     }
-  }, [messages])
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom()
