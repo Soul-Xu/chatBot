@@ -293,12 +293,17 @@ const Content = (props: Props) => {
                       data: lineObj.data,
                       // @ts-ignore
                       content: <JumpDetail item={lineObj.data} />,
+                      isLoading: false,
                       isRotating: false,
                     },
                   ];
 
                   return updatedRecords;
                 });
+              }
+              // 检查intent是否为'intent'
+              if (lineObj.intent === 'intent') {
+                setCurrentScene('intent');
               }
             }
           } catch (error) {
@@ -310,87 +315,86 @@ const Content = (props: Props) => {
   }
 
   const chatRecord = () => {
-  return (
-    <div className={classNames("chat-record")}>
-      {
-        chartRecord?.map((item: any, index: number) => {
-          const key = item.id ? item.id : `record-${index}`;
-          return (
-            <div className={classNames("record-item")} key={key}>
-              {
-                item.role === "user" ? (
-                  <div className={classNames("user")}>
-                    <div className={classNames("user-content")}>
-                      <span>{item?.content}</span>
-                      <div className={classNames("user-content-action")} onClick={() => handleCopy(item.content)}>
-                        <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
-                        <span className={classNames("action-box-text")}>复制</span>
-                      </div>
-                    </div>
-                    <div className={classNames("user-avatar")}>
-                      <Avatar size={32} icon={<UserOutlined />} />
-                    </div>
-                  </div>
-                ) : (
-                  <div className={classNames("assistant")}>
-                    <div className={classNames("assistant-avatar")}>
-                      <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-                    </div>
-                    <div className={classNames("assistant-content")}>
-                      {
-                        item.isLoading ? (
-                          <span className={classNames("assistant-content-title")}>
-                            <DotAnimation />
-                          </span>
-                        ) : (
-                          <div>
-                            <span className={classNames("assistant-content-title")}>
-                              {currentScene === 'tl_generate' && <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>}
-                              {currentScene === 'tl_launch' && <div>{item?.content}</div>}
-                              {currentScene === 'tl_query' && <div>{item?.content}</div>}
-                              {
-                                item.isRotating && (
-                                  <span className={classNames("loading")}>
-                                    <RedoOutlined className={classNames('rotate-animation-infinite')} />
-                                  </span>
-                                )
-                              }
-                            </span>
-                          </div>
-                        )
-                      }
-                      <div className={classNames("assistant-content-action")}>
-                        <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
+    return (
+      <div className={classNames("chat-record")}>
+        {
+          chartRecord?.map((item: any, index: number) => {
+            const key = item.id ? item.id : `record-${index}`;
+            return (
+              <div className={classNames("record-item")} key={key}>
+                {
+                  item.role === "user" ? (
+                    <div className={classNames("user")}>
+                      <div className={classNames("user-content")}>
+                        <span>{item?.content}</span>
+                        <div className={classNames("user-content-action")} onClick={() => handleCopy(item.content)}>
                           <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
                           <span className={classNames("action-box-text")}>复制</span>
-                        </span>
-                        <span className={classNames("action-box")}>
-                          <Image
-                            src={ImgRefreshAction}
-                            alt="再试一次"
-                            width={20}
-                            height={20}
-                            className={classNames({ 'rotate-animation': item.isRotating })}
-                          />
-                          <span
-                            className={classNames("action-box-text")}
-                            onClick={() => handleTryAgainClick(item)}
-                          >再试一次</span>
-                        </span>
+                        </div>
+                      </div>
+                      <div className={classNames("user-avatar")}>
+                        <Avatar size={32} icon={<UserOutlined />} />
                       </div>
                     </div>
-                  </div>
-                )
-              }
-            </div>
-          );
-        })
-      }
-      <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
-    </div>
-  );
-};
-
+                  ) : (
+                    <div className={classNames("assistant")}>
+                      <div className={classNames("assistant-avatar")}>
+                        <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
+                      </div>
+                      <div className={classNames("assistant-content")}>
+                        {
+                          item.isLoading ? (
+                            <span className={classNames("assistant-content-title")}>
+                              <DotAnimation />
+                            </span>
+                          ) : (
+                            <div>
+                              <span className={classNames("assistant-content-title")}>
+                                {currentScene === 'tl_generate' && <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>}
+                                {currentScene === 'tl_launch' && <div>{item?.content}</div>}
+                                {currentScene === 'tl_query' && <div>{item?.content}</div>}
+                                {
+                                  item.isRotating && (
+                                    <span className={classNames("loading")}>
+                                      <RedoOutlined className={classNames('rotate-animation-infinite')} />
+                                    </span>
+                                  )
+                                }
+                              </span>
+                            </div>
+                          )
+                        }
+                        <div className={classNames("assistant-content-action")}>
+                          <span className={classNames("action-box")} onClick={() => handleCopy(item.content)}>
+                            <Image src={ImgCopyAction} alt="复制" width={20} height={20} />
+                            <span className={classNames("action-box-text")}>复制</span>
+                          </span>
+                          <span className={classNames("action-box")}>
+                            <Image
+                              src={ImgRefreshAction}
+                              alt="再试一次"
+                              width={20}
+                              height={20}
+                              className={classNames({ 'rotate-animation': item.isRotating })}
+                            />
+                            <span
+                              className={classNames("action-box-text")}
+                              onClick={() => handleTryAgainClick(item)}
+                            >再试一次</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+              </div>
+            );
+          })
+        }
+        <div ref={messagesEndRef} /> {/* 放置在消息列表的最后 */}
+      </div>
+    );
+  };
 
   const scrollToBottom = () => {
     // @ts-ignore
@@ -401,30 +405,33 @@ const Content = (props: Props) => {
   useEffect(() => {
     if (messages && messages?.length > 0) {
       const newMessage = messages[messages.length - 1];
-      const newMessagesArray = [
-        ...chartRecord,
-        {
-          sessionId: Date.now(), // 使用时间戳作为 sessionId
-          role: "user",
-          content: newMessage
-        },
-        {
-          sessionId: Date.now(), // 使用时间戳作为 sessionId
-          role: "assistant",
-          content: <TextLoading />, // 显示加载组件
-          isLoading: true // 添加一个 isLoading 标志
-        }
-      ];
-      setChartRecord(newMessagesArray);
-      setIsLoading(true);
+      console.log('message-111', chartRecord)
+      if (Array.isArray(chartRecord)) {
+        const newMessagesArray = [
+          ...chartRecord,
+          {
+            sessionId: Date.now(), // 使用时间戳作为 sessionId
+            role: "user",
+            content: newMessage
+          },
+          {
+            sessionId: Date.now(), // 使用时间戳作为 sessionId
+            role: "assistant",
+            content: <TextLoading />, // 显示加载组件
+            isLoading: true // 添加一个 isLoading 标志
+          }
+        ];
+        setChartRecord(newMessagesArray);
+        setIsLoading(true);
 
-      // 调用 postStreamData 并处理异步逻辑
-      const params = {
-        inputContent: newMessage,
-        sessionId: '' // 使用时间戳作为 sessionId
-      };
-      // 模拟异步请求后端数据
-      postStreamData(params)
+        // 调用 postStreamData 并处理异步逻辑
+        const params = {
+          inputContent: newMessage,
+          sessionId: '' // 使用时间戳作为 sessionId
+        };
+        // 模拟异步请求后端数据
+        postStreamData(params)
+      }
     }
   }, [messages]);
 
