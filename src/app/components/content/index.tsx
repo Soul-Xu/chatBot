@@ -103,7 +103,7 @@ const Content = (props: Props) => {
     let postUrl = ''
 
     // 1.0接口请求逻辑
-    const baseUrlLocal = 'http://81.69.218.11:9140/data/chatBot/qa'
+    const baseUrlLocal = 'http://81.69.218.11:8080/aiagent/api/data/chatBot/qa'
     const baseUrlSit = 'http://172.253.168.62:8080/aiagent/api/data/chatbot/chat'
     const baseUrlUat = 'https://workflow-uat.newone.com.cn/aiagent/api/data/chatbot/chat '
     const sitUrl = 'http://172.253.168.62:8080'
