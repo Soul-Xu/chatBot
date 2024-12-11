@@ -6,7 +6,6 @@ import ImgLinkIcon from "@/public/images/link_icon.png";
 import classnames from "classnames/bind";
 import styles from "./index.module.scss";
 const classNames = classnames.bind(styles);
-
 interface JumpDetailProps {
   item: any;
 }
@@ -38,27 +37,28 @@ const JumpDetail = (props: JumpDetailProps) => {
         // 如果orgs数组不为空，则添加到查询参数中，并进行编码
         ...(orgs.length > 0 && { orgs: encodeURIComponent(orgs.join(',')) }),
       });
-
       // 构建完整的跳转URL
       const fullUrl = `${linkUrl}?aiQuery=${query.toString()}`;
-
-      console.log('fullUrl', fullUrl)
-
       // 更新状态以触发重新渲染
       setRedirectUrl(fullUrl);
     }
   }, [item]); // 依赖项数组中包含item，当item变化时，副作用函数将重新运行
 
   return (
-    <div className={classNames("assistant-content-detail")}>
-      {redirectUrl && (
-        <Link href={redirectUrl} target="_blank">
-          查看详情
-        </Link>
-      )}
-      <span className={classNames("assistant-detail-link")}>
-        <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12} />
-      </span>
+    <div className={classNames("assistant")}>
+      <div className={classNames("assistant-tip")}>
+        根据您输入的内容，为您查询到相关流程，可点击详情进行查看：
+      </div>
+      <div className={classNames("assistant-content")}>
+        {redirectUrl && (
+          <Link href={redirectUrl} target="_blank">
+            查看详情
+          </Link>
+        )}
+        <span className={classNames("assistant-content-detail")}>
+          <Image src={ImgLinkIcon} alt="link_icon" width={12} height={12} />
+        </span>
+      </div>
     </div>
   );
 }

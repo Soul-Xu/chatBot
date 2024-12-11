@@ -1,9 +1,10 @@
 // lib/axios.ts
 import axios from 'axios';
+import { baseURL } from './constants'
 
 // 创建一个 Axios 实例
 const instance = axios.create({
-  baseURL: 'http://81.69.218.11:9140/aiagent/web/data', // 基础 URL，根据你的后端 API 来配置
+  baseURL, // 基础 URL，根据你的后端 API 来配置
   timeout: 10000, // 请求超时时间
 });
 

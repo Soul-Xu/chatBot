@@ -1,9 +1,10 @@
 "use client"
-import React, { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef, useCallback } from "react"
 import Image from "next/image"
 import ImgChatbot from "@/public/images/chatbot.png"
 import ImgCopyAction from "@/public/images/copy_action.png"
 import ImgRefreshAction from "@/public/images/refresh_action.png"
+import OpeningState from "./components/openingState"
 import DotAnimation from "./components/dotAnimation"
 import TextLoading from "./components/textLoading"
 import JumpList from "./components/jumpList"
@@ -16,6 +17,7 @@ import { UserOutlined, RedoOutlined } from '@ant-design/icons'
 import classnames from "classnames/bind"
 import styles from "./index.module.scss"
 const classNames = classnames.bind(styles)
+import { baseURL } from "@/lib/constants"
 import dayjs from 'dayjs'
 interface Props {
   children?: React.ReactNode
@@ -25,14 +27,6 @@ interface Props {
 const Content = (props: Props) => {
   const { messages } = props
   const dispatch = useDispatch();
-  const chatResponse = useSelector((state: any) => state.chat);
-  // 当前场景
-  const [currentScene, setCurrentScene] = useState('tl_generate')
-  // 添加一个loading控制答案的输出状态
-  const [isLoading, setIsLoading] = useState(false)
-  // 添加一个answerLoading控制答案输入中还未完成的输出状态
-  const [answerLoading, setAnswerLoading] = useState(false)
-  // 修改 chatRecord 状态，为每个记录添加一个旋转状态
   const [chartRecord, setChartRecord] = useState<any>([])
   const messagesEndRef = useRef(null) // 添加一个引用
 
@@ -53,57 +47,31 @@ const Content = (props: Props) => {
     postStreamData(params)
   }
 
-  // 开场白
-  const openingStatement = () => {
-    return (
-      <div className={classNames("opening-statement")}>
-        <div className={classNames("avatar")}>
-          <Image src={ImgChatbot} alt="chatbot" width={20} height={19} />
-        </div>
-        <div className={classNames("content")}>
-          <p>您好，我是流程助手～</p>
-          <p>您可以通过对话快速查找需要发起的流程，</p>
-          <p>查询你的待办流程，或者了解流程处理常见问题。</p>
-        </div>
-      </div>
-    )
-  }
-
-  const rawContent = (content: any) => {
-    // 检查 content 是否为字符串
-    if (typeof content !== 'string') {
-      return ''; // 或者返回 null，或者根据你的需求返回合适的默认值
+  const renderAnswer = (content: any) => {
+    if (typeof content === 'object') {
+      // 如果是 React 元素，直接返回它，以便在 JSX 中渲染
+      return <div>{content}</div>
     }
-
-    // 替换换行符为 <br> 标签
-    const contentWithBreaks = content.replace(/\n/g, '<br>');
-    // 替换加粗标记为 <strong> 标签
-    const contentWithStrong = contentWithBreaks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    return contentWithStrong;
-  }
-
-    // 给父级页面发送信息
-  // 假设在AI聊天机器人的某个函数中，比如处理完聊天消息后
-  const sendChatMessageToParent = (message:any) => {
-    console.log('给父级页面发送信息', message)
-
-    // const parentOrigin = window.parent.location.origin
-    const destUrl = 'http://172.253.168.62:8080/cms-center/desktop/#/processEntrust/view'
-
-    // 发送消息给父页面
-    window.parent.postMessage({
-      type: 'CHAT_MESSAGE',
-      content: message
-    }, destUrl) // 替换为父页面的实际源
+    if (typeof content === 'string') {
+      // 如果 content 是字符串，进行字符串处理
+      if (content.includes('\n')) {
+        // 替换换行符为 <br> 标签
+        const contentWithBreaks = content.replace(/\n/g, '<br>');
+        // 替换加粗标记为 <strong> 标签
+        const contentWithStrong = contentWithBreaks.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        return <div dangerouslySetInnerHTML={{ __html: contentWithStrong }}></div>;
+      } else {
+        return <div>{content}</div>;
+      }
+    }
   }
 
   // stream-post
   const postStreamData = async (data:any) => {
-    setIsLoading(true)
     let postUrl = ''
 
     // 1.0接口请求逻辑
-    const baseUrlLocal = 'http://81.69.218.11:8080/aiagent/api/data/chatBot/qa'
+    const baseUrlLocal = `${baseURL}/chatBot/qa`
     const baseUrlSit = 'http://172.253.168.62:8080/aiagent/api/data/chatbot/chat'
     const baseUrlUat = 'https://workflow-uat.newone.com.cn/aiagent/api/data/chatbot/chat '
     const sitUrl = 'http://172.253.168.62:8080'
@@ -175,15 +143,16 @@ const Content = (props: Props) => {
             if (lineObj.done === true) {
               // 使用回调函数确保状态更新完成
               setChartRecord((prevChartRecord:any) => {
+                const len = prevChartRecord.length
                 if (prevChartRecord.length === 0) {
                   return prevChartRecord
                 }
                 if (prevChartRecord.length === 1) {
                   return prevChartRecord
                 }
-                if (prevChartRecord.length === 2) {
-                  const questionObj = prevChartRecord[0]
-                  const answerObj = prevChartRecord[1]
+                if (prevChartRecord.length > 1) {
+                  const questionObj = prevChartRecord[len - 2]
+                  const answerObj = prevChartRecord[len - 1]
                   const params = {
                     id: answerObj.id,
                     sessionId: answerObj.sessionId,
@@ -200,38 +169,69 @@ const Content = (props: Props) => {
                 }
               });
               // 如果 done 为 true，表示所有数据已经接收完毕，我们可以关闭流
-              setAnswerLoading(false);
             } else {
-              setIsLoading(false);
-              setAnswerLoading(true);
               if (lineObj.intent === 'tl_launch') {
-                setCurrentScene('tl_launch')
                 setChartRecord((prevChartRecord:any) => {
                   // 获取倒数第二个元素作为question的值
                   const questionContent = prevChartRecord[prevChartRecord.length - 2]?.content || '';
 
-                  // 创建一个新数组，其中最后一个元素被新的对象替换
-                  const updatedRecords = [
-                    ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
-                    {
-                      id: lineObj.id,
-                      sessionId: lineObj.sessionId,
-                      userCode: 'chenhaiyong',
-                      question: questionContent, // 使用倒数第二个元素的内容
-                      createTime: lineObj.createTime,
-                      role: 'assistant',
-                      intent: lineObj.intent,
-                      data: lineObj.data,
-                      content: <JumpList messageTip={questionContent} listData={lineObj.data} />,
-                      isRotating: false,
-                    },
-                  ];
-
-                  return updatedRecords;
+                  if (lineObj.data.length > 0) {
+                    const updatedRecords = [
+                      ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                      {
+                        id: lineObj.id,
+                        sessionId: lineObj.sessionId,
+                        userCode: 'chenhaiyong',
+                        question: questionContent, // 使用倒数第二个元素的内容
+                        createTime: lineObj.createTime,
+                        role: 'assistant',
+                        intent: lineObj.intent,
+                        data: lineObj.data,
+                        content: <JumpList messageTip={questionContent} listData={lineObj.data} />,
+                        isRotating: false,
+                      },
+                    ];
+                    return updatedRecords;
+                  } else if (Array.isArray(lineObj.data) && lineObj.data.length === 0){
+                    // 创建一个新数组，其中最后一个元素被新的对象替换
+                    const updatedRecords = [
+                      ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                      {
+                        id: lineObj.id,
+                        sessionId: lineObj.sessionId,
+                        userCode: 'chenhaiyong',
+                        question: questionContent, // 使用倒数第二个元素的内容
+                        createTime: lineObj.createTime,
+                        role: 'assistant',
+                        intent: lineObj.intent,
+                        data: lineObj.data,
+                        content: '您输入的流程名称在流程库中不存在，请确认输入的流程名称。',
+                        isRotating: false,
+                      },
+                    ];
+                    return updatedRecords;
+                  } else if (!Array.isArray(lineObj.data) && lineObj.data === '') {
+                    // 创建一个新数组，其中最后一个元素被新的对象替换
+                    const updatedRecords = [
+                      ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                      {
+                        id: lineObj.id,
+                        sessionId: lineObj.sessionId,
+                        userCode: 'chenhaiyong',
+                        question: questionContent, // 使用倒数第二个元素的内容
+                        createTime: lineObj.createTime,
+                        role: 'assistant',
+                        intent: lineObj.intent,
+                        data: lineObj.data,
+                        content: '服务已断开，请刷新后重试。',
+                        isRotating: false,
+                      },
+                    ];
+                    return updatedRecords;
+                  }
                 });
               }
               if (lineObj.intent === 'tl_generate') {
-                setCurrentScene('tl_generate')
                 setChartRecord((prevChartRecord:any) => {
                   // 检查数组是否至少有一个元素
                   if (prevChartRecord.length > 0) {
@@ -274,7 +274,6 @@ const Content = (props: Props) => {
               }
               // 检查intent是否为'tl_query'
               if (lineObj.intent === 'tl_query') {
-                setCurrentScene('tl_query');
                 setChartRecord((prevChartRecord: any) => {
                   // 获取倒数第二个元素作为question的值
                   const questionContent = prevChartRecord[prevChartRecord.length - 2]?.content || '';
@@ -302,8 +301,30 @@ const Content = (props: Props) => {
                 });
               }
               // 检查intent是否为'intent'
-              if (lineObj.intent === 'intent') {
-                setCurrentScene('intent');
+              if (lineObj.intent === 'intent') {    
+                if (!Array.isArray(lineObj.data) && lineObj.data === '') {
+                  setChartRecord((prevChartRecord:any) => {
+                    // 获取倒数第二个元素作为question的值
+                    const questionContent = prevChartRecord[prevChartRecord.length - 2]?.content || '';
+                     // 创建一个新数组，其中最后一个元素被新的对象替换
+                    const updatedRecords = [
+                      ...prevChartRecord.slice(0, -1), // 获取除了最后一个元素之外的所有元素
+                      {
+                        id: lineObj.id,
+                        sessionId: lineObj.sessionId,
+                        userCode: 'chenhaiyong',
+                        question: questionContent, // 使用倒数第二个元素的内容
+                        createTime: lineObj.createTime,
+                        role: 'assistant',
+                        intent: lineObj.intent,
+                        data: lineObj.data,
+                        content: '服务已断开，请刷新后重试。',
+                        isRotating: false,
+                      },
+                    ];
+                    return updatedRecords;
+                  })
+                }                      
               }
             }
           } catch (error) {
@@ -350,9 +371,7 @@ const Content = (props: Props) => {
                           ) : (
                             <div>
                               <span className={classNames("assistant-content-title")}>
-                                {currentScene === 'tl_generate' && <div dangerouslySetInnerHTML={{ __html: rawContent(item?.content) }}></div>}
-                                {currentScene === 'tl_launch' && <div>{item?.content}</div>}
-                                {currentScene === 'tl_query' && <div>{item?.content}</div>}
+                                {renderAnswer(item?.content)}
                                 {
                                   item.isRotating && (
                                     <span className={classNames("loading")}>
@@ -401,39 +420,35 @@ const Content = (props: Props) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-   // 调整后的 useEffect，用于处理新的消息
+  // 调整后的 useEffect，用于处理新的消息
   useEffect(() => {
     if (messages && messages?.length > 0) {
       const newMessage = messages[messages.length - 1];
-      console.log('message-111', chartRecord)
-      if (Array.isArray(chartRecord)) {
-        const newMessagesArray = [
-          ...chartRecord,
-          {
-            sessionId: Date.now(), // 使用时间戳作为 sessionId
-            role: "user",
-            content: newMessage
-          },
-          {
-            sessionId: Date.now(), // 使用时间戳作为 sessionId
-            role: "assistant",
-            content: <TextLoading />, // 显示加载组件
-            isLoading: true // 添加一个 isLoading 标志
-          }
-        ];
-        setChartRecord(newMessagesArray);
-        setIsLoading(true);
+      // 添加新消息到 chartRecord，但不改变之前的 loading 状态
+      setChartRecord((prevChartRecord:any) => [
+        ...prevChartRecord,
+        {
+          sessionId: Date.now(), // 使用时间戳作为 sessionId
+          role: "user",
+          content: newMessage,
+        },
+        {
+          sessionId: Date.now(), // 使用时间戳作为 sessionId
+          role: "assistant",
+          content: <TextLoading />, // 显示加载组件
+          isLoading: true, // 添加一个 isLoading 标志
+        },
+      ]);
 
-        // 调用 postStreamData 并处理异步逻辑
-        const params = {
-          inputContent: newMessage,
-          sessionId: '' // 使用时间戳作为 sessionId
-        };
-        // 模拟异步请求后端数据
-        postStreamData(params)
-      }
+      // 调用 postStreamData 并处理异步逻辑
+      const params = {
+        inputContent: newMessage,
+        sessionId: Date.now().toString(), // 使用时间戳作为 sessionId
+      };
+      // 模拟异步请求后端数据
+      postStreamData(params);
     }
-  }, [messages]);
+  }, [messages]); // 依赖项仅包含 messages
 
   useEffect(() => {
     scrollToBottom()
@@ -442,7 +457,7 @@ const Content = (props: Props) => {
   return (
     <main className={classNames("main")}>
       <div className={classNames("content")}>
-        {openingStatement()}
+        <OpeningState />
         {chatRecord()}
       </div>
     </main>

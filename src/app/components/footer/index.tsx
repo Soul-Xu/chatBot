@@ -42,27 +42,27 @@ const Footer = (props: Props) => {
     setIsThrottled(true)
     if (message) {
       onSendMessage(message)
-      sendChatMessageToParent(message)
+      // sendChatMessageToParent(message)
       setMessage("")
       setInputHeight(36)
     }
     setTimeout(() => setIsThrottled(false), 3000) // 3秒后恢复按钮点击功能
   }
 
-  // 给父级页面发送信息
-  // 假设在AI聊天机器人的某个函数中，比如处理完聊天消息后
-  const sendChatMessageToParent = (message:any) => {
-    console.log('给父级页面发送信息', message)
+  // // 给父级页面发送信息
+  // // 假设在AI聊天机器人的某个函数中，比如处理完聊天消息后
+  // const sendChatMessageToParent = (message:any) => {
+  //   console.log('给父级页面发送信息', message)
 
-    // const parentOrigin = window.parent.location.origin
-    const destUrl = 'http://172.253.168.62:8080/cms-center/desktop/#/processEntrust/view'
+  //   // const parentOrigin = window.parent.location.origin
+  //   const destUrl = 'http://172.253.168.62:8080/cms-center/desktop/#/processEntrust/view'
 
-    // 发送消息给父页面
-    window.parent.postMessage({
-      type: 'CHAT_MESSAGE',
-      content: message
-    }, destUrl) // 替换为父页面的实际源
-  }
+  //   // 发送消息给父页面
+  //   window.parent.postMessage({
+  //     type: 'CHAT_MESSAGE',
+  //     content: message
+  //   }, destUrl) // 替换为父页面的实际源
+  // }
 
   useEffect(() => {
     if (inputHeight === 0) {

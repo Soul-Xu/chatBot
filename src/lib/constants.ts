@@ -1,0 +1,1 @@
+export const baseURL = 'http://81.69.218.11:8080/aiagent/api/data'

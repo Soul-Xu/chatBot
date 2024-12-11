@@ -1,0 +1,35 @@
+  .opening-state {
+    display: flex;
+    height: 112px;
+    margin-bottom: 20px;
+
+    .avatar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      width: 32px;
+      height: 32px;
+      background: #FFFFFF;
+      border: 1px solid #FFFFFF;
+      border-radius: 50%;
+    }
+
+    .content {
+      margin-top: 8px;
+      width: 296px;
+      background: #FFFFFF;
+      border: 1px solid #FFFFFF;
+      border-radius: 6px;
+      padding: 12px 14px 14px 10px;
+
+      p {
+        font-family: MicrosoftYaHei;
+        font-size: 14px;
+        color: #333333;
+        line-height: 20px;
+        text-align: left;
+        font-style: normal;
+      }
+    }
+  }
